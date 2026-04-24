@@ -26,13 +26,15 @@ Minimal Fabric starter repo for Minecraft 26.1.2. This is intentionally tiny and
 
 ### Launcher / mod list display (Prism, MultiMC, Mod Menu)
 
-Fabric reads `fabric.mod.json` for the name, description, authors, license, `contact`, and **`icon`**. This repo ships **`assets/fpsmod/icon.png`** so launchers can show a thumbnail in the mods panel. After forking, replace the PNG and update `authors` / `contact` to match your project.
+Fabric reads `fabric.mod.json` for the name, description, authors, license, `contact`, and **`icon`**. This repo ships **`assets/fpsmod/icon.png`** (placeholder) so launchers can show a thumbnail in the mods panel. After forking, replace the PNG with your own icon (same path or update the `icon` field) and update `authors` / all **`contact`** entries (`homepage`, `sources`, `issues`) to match your project. Optional: **`suggests.modmenu`** (this template includes it) soft-recommends Mod Menu when present; the game still runs without it.
+
+**Mod Menu “Client” badge:** set top-level **`"environment": "client"`** (this template does). That tells Fabric Loader the mod is **client-only**; Mod Menu surfaces it as the blue **Client** tag. Use `"*"` only if you intentionally load the same jar on dedicated servers too.
 
 ### In-game FPS HUD (behavior)
 
 - Renders as a Fabric [`HudElementRegistry`](https://maven.fabricmc.net/docs/fabric-api-0.146.1+26.1.2/net/fabricmc/fabric/api/client/rendering/v1/hud/HudElementRegistry.html) layer **before** `VanillaHudElements.MISC_OVERLAYS`, so it stacks like normal HUD content and respects **Hide HUD** (`F1`).
 - **FPS value** is sampled from the client’s built-in FPS counter **at most once per second** to keep work minimal.
-- **Toggle control** is a screen button (top-left) added to UI screens (inventory/pause/chat/pause menu).
+- **Toggle control** is a screen button (top-left) added to UI screens (inventory/pause/chat/pause menu) **only while you are in a world** (`client.level` and `client.player` must exist). The main/title menu does not get this button; load or join a world first.
 - The world HUD now renders FPS text only (no clickable world-space button). The log prints `🔁` when state changes.
 - Screen button injection uses Fabric Screen API (`ScreenEvents.AFTER_INIT` + `Screens.getWidgets(screen).add(button)`), which is compatible with current access rules.
 
@@ -40,7 +42,8 @@ Fabric reads `fabric.mod.json` for the name, description, authors, license, `con
 
 - Pressing `F1` (Hide HUD) hides the in-world FPS text.
 - Pause/inventory/chat can dim or cover world HUD layers depending on screen rendering; use the screen-level top-left button there.
-- Toggle input is handled by screen widgets (top-left button on screens), not by world HUD mouse clicks.
+- Toggle input is handled by screen widgets (top-left button on screens), not by world HUD mouse clicks. If no screen is open, open inventory or pause (in a world) to use the button.
+- No screen toggle on the title menu until a world is loaded (by design; see `FpsHudScreenButton`).
 - FPS text updates once per second by design, so it is intentionally not frame-perfect every render tick.
 
 ## Tech stack (at a glance)
@@ -157,7 +160,7 @@ Recommended growth path:
 3. **Maven group / package** — replace `com.fpsmod` (Java package + `maven_group` in `gradle.properties`).
 4. **Project name** — update `rootProject.name` in `settings.gradle` if you want a different Gradle project name.
 5. **Display name** — edit `name` / `description` in `fabric.mod.json`.
-6. **Mod panel metadata** — update `authors`, `contact`, and `icon` in `fabric.mod.json` for Prism/MultiMC/Mod Menu display.
+6. **Mod panel metadata** — update `authors`, all `contact` fields (`homepage`, `sources`, `issues`), and `icon` in `fabric.mod.json` for Prism/MultiMC/Mod Menu display. Adjust or remove `suggests.modmenu` if you prefer a minimal `fabric.mod.json`.
 7. **License** — replace `LICENSE` and the `license` field in `fabric.mod.json` if you are not using CC0.
 8. **Compatibility** — when you change Minecraft or Fabric versions, update `gradle.properties`, `fabric.mod.json` `depends`, and this README’s compatibility table so they stay in sync.
 

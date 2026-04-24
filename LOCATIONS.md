@@ -20,7 +20,7 @@ Use this as the first stop for quick discovery.
 
 ## Mod metadata + wiring
 
-- Mod metadata and entrypoints: `src/main/resources/fabric.mod.json`
+- Mod metadata and entrypoints: `src/main/resources/fabric.mod.json` (`environment: client` → Mod Menu **Client** badge; `contact.issues` → Mod Menu **Issues** link; optional `suggests.modmenu` for nicer in-game mod list when Mod Menu is installed)
 - Prism/MultiMC mod icon asset: `src/main/resources/assets/fpsmod/icon.png`
 - Mod id constant: `FpsMod.MOD_ID` in `src/main/java/com/fpsmod/FpsMod.java`
 - Client entrypoint target class: `com.fpsmod.FpsModClient` in `fabric.mod.json`
@@ -69,4 +69,4 @@ Use this as the first stop for quick discovery.
 
 ## Git / upstream
 
-- Default remote is set when you clone; this template was pushed to `https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod` (update `contact` in `fabric.mod.json` if your fork lives elsewhere).
+- Default remote is set when you clone; this template was pushed to `https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod` (if you fork or rename the repo, update all `contact` fields in `fabric.mod.json`: `homepage`, `sources`, and `issues`).

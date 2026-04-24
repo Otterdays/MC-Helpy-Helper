@@ -9,11 +9,12 @@
   ],
   "contact": {
     "homepage": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod",
-    "sources": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod"
+    "sources": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod",
+    "issues": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod/issues"
   },
   "license": "CC0-1.0",
   "icon": "assets/fpsmod/icon.png",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "main": [
       "com.fpsmod.FpsMod"
@@ -27,5 +28,8 @@
     "minecraft": "~26.1.2",
     "java": ">=25",
     "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
   }
 }
