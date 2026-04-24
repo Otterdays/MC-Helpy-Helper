@@ -1,12 +1,25 @@
 # FPS Mod — barebones Fabric template
 
-This repository is intentionally **minimal**: a tiny Fabric mod for **Minecraft 26.1.2** plus a working Gradle setup. Treat it as a **starter you duplicate**, not a feature-complete mod.
+![Template](https://img.shields.io/badge/Template-Barebones-blue)
+![Minecraft](https://img.shields.io/badge/Minecraft-26.1.2-brightgreen)
+![Fabric Loader](https://img.shields.io/badge/Fabric%20Loader-0.19.2-orange)
+![Fabric API](https://img.shields.io/badge/Fabric%20API-0.146.1%2B26.1.2-yellow)
+![Java](https://img.shields.io/badge/Java-25%2B-red)
+![Build](https://img.shields.io/badge/Build-Gradle%209.4.1-02303A)
 
-**Use it as a template:** copy or fork this repo (or clone and push to a new remote), then rename IDs, packages, and metadata for your own project and build from there. The code only logs on load so you have a clean place to add content.
+Minimal Fabric starter repo for Minecraft 26.1.2. This is intentionally tiny and meant to be duplicated as your starting point, then extended.
 
-## Compatibility
+## Tech stack (at a glance)
 
-These are the versions this template is built and tested against (also declared in `gradle.properties` and `src/main/resources/fabric.mod.json`). Update all of them together when you move to a new Minecraft line.
+- Minecraft: `26.1.2`
+- Mod loader: `Fabric Loader 0.19.2`
+- API: `Fabric API 0.146.1+26.1.2`
+- Language/runtime: `Java 25+`
+- Build: `Gradle 9.4.1` + `Fabric Loom 1.16-SNAPSHOT`
+
+## Version compatibility
+
+These versions are declared in `gradle.properties` and `src/main/resources/fabric.mod.json`. Keep them in sync when upgrading.
 
 | Component | Version | Notes |
 |-----------|---------|--------|
@@ -18,6 +31,13 @@ These are the versions this template is built and tested against (also declared 
 Build tooling: **Fabric Loom** is set to **1.16-SNAPSHOT** in `gradle.properties` (see [Fabric develop](https://fabricmc.net/develop) when upgrading).
 
 Versions are aligned with the official [Fabric example mod](https://github.com/FabricMC/fabric-example-mod) **26.1.2** template line.
+
+## Purpose
+
+Use this repo as a template:
+- copy/fork/duplicate it into a new repository
+- rename IDs/packages/metadata for your own mod
+- start building features from this known-good baseline
 
 ## Requirements
 
