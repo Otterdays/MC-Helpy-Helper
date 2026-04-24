@@ -4,7 +4,7 @@
 <p align="center">
   <a href="https://fabricmc.net/"><img alt="Minecraft" src="https://img.shields.io/badge/Minecraft-26.1.2-44AF35?style=for-the-badge&logo=minecraft&logoColor=white" /></a>
   <a href="https://fabricmc.net/use/install/"><img alt="Fabric Loader" src="https://img.shields.io/badge/Fabric%20Loader-0.19.2-DB2233?style=for-the-badge&logoColor=white" /></a>
-  <a href="https://modrinth.com/mod/fabric-api"><img alt="Fabric API" src="https://img.shields.io/badge/Fabric%20API-0.146.1%2B26.1.2-FFF04D?style=for-the-badge&logo=openjdk&logoColor=black" /></a>
+  <a href="https://modrinth.com/mod/fabric-api"><img alt="Fabric API" src="https://img.shields.io/badge/Fabric%20API-0.146.1%2B26.1.2-FFF04D?style=for-the-badge" /></a>
 </p>
 <p align="center">
   <img alt="Java" src="https://img.shields.io/badge/Java-25%2B-F40404?style=for-the-badge&logo=openjdk&logoColor=white" />
