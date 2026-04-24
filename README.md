@@ -1,13 +1,36 @@
 # FPS Mod — barebones Fabric template
 
-![Template](https://img.shields.io/badge/Template-Barebones-blue)
-![Minecraft](https://img.shields.io/badge/Minecraft-26.1.2-brightgreen)
-![Fabric Loader](https://img.shields.io/badge/Fabric%20Loader-0.19.2-orange)
-![Fabric API](https://img.shields.io/badge/Fabric%20API-0.146.1%2B26.1.2-yellow)
-![Java](https://img.shields.io/badge/Java-25%2B-red)
-![Build](https://img.shields.io/badge/Build-Gradle%209.4.1-02303A)
+<!-- Badges: versions in gradle.properties; style=for-the-badge; logos use Shields + Simple Icons only -->
+<p align="center">
+  <a href="https://fabricmc.net/"><img alt="Minecraft" src="https://img.shields.io/badge/Minecraft-26.1.2-44AF35?style=for-the-badge&logo=minecraft&logoColor=white" /></a>
+  <a href="https://fabricmc.net/use/install/"><img alt="Fabric Loader" src="https://img.shields.io/badge/Fabric%20Loader-0.19.2-DB2233?style=for-the-badge&logoColor=white" /></a>
+  <a href="https://modrinth.com/mod/fabric-api"><img alt="Fabric API" src="https://img.shields.io/badge/Fabric%20API-0.146.1%2B26.1.2-FFF04D?style=for-the-badge&logo=openjdk&logoColor=black" /></a>
+</p>
+<p align="center">
+  <img alt="Java" src="https://img.shields.io/badge/Java-25%2B-F40404?style=for-the-badge&logo=openjdk&logoColor=white" />
+  <img alt="Loom" src="https://img.shields.io/badge/Loom-1.16--SNAPSHOT-7C4DFF?style=for-the-badge" />
+  <img alt="Gradle" src="https://img.shields.io/badge/Gradle-9.4.1-02303A?style=for-the-badge&logo=gradle&logoColor=white" />
+  <img alt="Mod version" src="https://img.shields.io/badge/Mod-1.0.0-007EC6?style=for-the-badge" />
+</p>
+<p align="center">
+  <img alt="Client only" src="https://img.shields.io/badge/Environment-client-5865F2?style=for-the-badge" />
+  <a href="https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-CC0%201.0-555555?style=for-the-badge" /></a>
+  <a href="https://github.com/FabricMC/fabric-example-mod"><img alt="Template lineage" src="https://img.shields.io/badge/Template-fabric--example--mod-0E0E0E?style=for-the-badge&logo=github&logoColor=white" /></a>
+</p>
 
-Minimal Fabric starter repo for Minecraft 26.1.2. This is intentionally tiny and meant to be duplicated as your starting point, then extended.
+<p align="center">
+  <strong>Version snapshot</strong> (see <code>gradle.properties</code> and <a href="src/main/resources/fabric.mod.json">fabric.mod.json</a> when you fork)
+</p>
+
+<!-- Small images: paths work on GitHub; width keeps the readme compact -->
+<p align="center">
+  <sub>In-repo artwork (for launcher / Mod Menu icon fields)</sub><br />
+  <a href="src/main/resources/assets/fpsmod/icon.png"><img src="src/main/resources/assets/fpsmod/icon.png" width="120" height="120" alt="Default mod icon (full)" /></a>
+  &nbsp;&nbsp;
+  <a href="src/main/resources/assets/fpsmod/icon_modrinth_cropped.png"><img src="src/main/resources/assets/fpsmod/icon_modrinth_cropped.png" width="120" height="120" alt="Cropped icon variant" /></a>
+</p>
+
+**FPS Mod** is a tiny [Fabric](https://fabricmc.net/) **client** mod: a top-left **FPS readout** (refreshed about once per second) and a **show/hide** control, with clear logs. This repository stays intentionally small: use it as a **template** to fork and extend, or drop the JAR in `mods` as-is.
 
 ## First check (before editing)
 

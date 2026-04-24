@@ -3,7 +3,7 @@
   "id": "fpsmod",
   "version": "${version}",
   "name": "FPS Mod",
-  "description": "Fabric starter with a lightweight FPS HUD (1s refresh) and toggle.",
+  "description": "Lightweight FPS counter on the HUD (1s refresh) with a simple show/hide toggle.",
   "authors": [
     "You"
   ],
