@@ -19,16 +19,29 @@ Minimal Fabric starter repo for Minecraft 26.1.2. This is intentionally tiny and
 - Registers a Fabric mod entrypoint (`ModInitializer`)
 - Registers a **client** entrypoint (`ClientModInitializer`) with a tiny HUD feature
 - Logs clear startup status lines with emoji markers
-- **In-game FPS overlay (lightweight)** — top-left HUD, **updates once per second** (no per-frame FPS math), vanilla-style bordered control
-- **Toggle** — click **Hide FPS / Show FPS** to enable/disable the numeric readout (button stays so you can turn it back on). Setting is saved under `config/fpsmod/hud.properties`
+- **In-game FPS overlay (lightweight)** — top-left HUD text, **updates once per second** (no per-frame FPS math)
+- **Toggle** — use **Hide FPS / Show FPS** screen button to enable/disable the readout. Setting is saved under `config/fpsmod/hud.properties`
 - Builds a valid mod jar for `mods/` using pinned Fabric + Minecraft versions (includes `src/client/java` via Loom split source sets)
 - Includes a starter JUnit 5 test harness
+
+### Launcher / mod list display (Prism, MultiMC, Mod Menu)
+
+Fabric reads `fabric.mod.json` for the name, description, authors, license, `contact`, and **`icon`**. This repo ships **`assets/fpsmod/icon.png`** so launchers can show a thumbnail in the mods panel. After forking, replace the PNG and update `authors` / `contact` to match your project.
 
 ### In-game FPS HUD (behavior)
 
 - Renders as a Fabric [`HudElementRegistry`](https://maven.fabricmc.net/docs/fabric-api-0.146.1+26.1.2/net/fabricmc/fabric/api/client/rendering/v1/hud/HudElementRegistry.html) layer **before** `VanillaHudElements.MISC_OVERLAYS`, so it stacks like normal HUD content and respects **Hide HUD** (`F1`).
 - **FPS value** is sampled from the client’s built-in FPS counter **at most once per second** to keep work minimal.
-- **Click** the control while **no screen** is open (not in inventory/pause) to toggle. The log prints `🔁` when the state changes.
+- **Toggle control** is a screen button (top-left) added to UI screens (inventory/pause/chat/pause menu).
+- The world HUD now renders FPS text only (no clickable world-space button). The log prints `🔁` when state changes.
+- Screen button injection uses Fabric Screen API (`ScreenEvents.AFTER_INIT` + `Screens.getWidgets(screen).add(button)`), which is compatible with current access rules.
+
+## Known UX caveats
+
+- Pressing `F1` (Hide HUD) hides the in-world FPS text.
+- Pause/inventory/chat can dim or cover world HUD layers depending on screen rendering; use the screen-level top-left button there.
+- Toggle input is handled by screen widgets (top-left button on screens), not by world HUD mouse clicks.
+- FPS text updates once per second by design, so it is intentionally not frame-perfect every render tick.
 
 ## Tech stack (at a glance)
 
@@ -144,8 +157,9 @@ Recommended growth path:
 3. **Maven group / package** — replace `com.fpsmod` (Java package + `maven_group` in `gradle.properties`).
 4. **Project name** — update `rootProject.name` in `settings.gradle` if you want a different Gradle project name.
 5. **Display name** — edit `name` / `description` in `fabric.mod.json`.
-6. **License** — replace `LICENSE` and the `license` field in `fabric.mod.json` if you are not using CC0.
-7. **Compatibility** — when you change Minecraft or Fabric versions, update `gradle.properties`, `fabric.mod.json` `depends`, and this README’s compatibility table so they stay in sync.
+6. **Mod panel metadata** — update `authors`, `contact`, and `icon` in `fabric.mod.json` for Prism/MultiMC/Mod Menu display.
+7. **License** — replace `LICENSE` and the `license` field in `fabric.mod.json` if you are not using CC0.
+8. **Compatibility** — when you change Minecraft or Fabric versions, update `gradle.properties`, `fabric.mod.json` `depends`, and this README’s compatibility table so they stay in sync.
 
 ## License
 

@@ -14,12 +14,14 @@ Use this as the first stop for quick discovery.
 - Main mod initializer: `src/main/java/com/fpsmod/FpsMod.java`
 - Client initializer: `src/client/java/com/fpsmod/FpsModClient.java`
 - FPS HUD feature: `src/client/java/com/fpsmod/client/FpsHudOverlay.java`
+- Screen-level FPS toggle button: `src/client/java/com/fpsmod/client/FpsHudScreenButton.java`
 - FPS HUD config persistence: `src/client/java/com/fpsmod/client/FpsHudConfig.java`
 - Unit test starter: `src/test/java/com/fpsmod/FpsModTest.java`
 
 ## Mod metadata + wiring
 
 - Mod metadata and entrypoints: `src/main/resources/fabric.mod.json`
+- Prism/MultiMC mod icon asset: `src/main/resources/assets/fpsmod/icon.png`
 - Mod id constant: `FpsMod.MOD_ID` in `src/main/java/com/fpsmod/FpsMod.java`
 - Client entrypoint target class: `com.fpsmod.FpsModClient` in `fabric.mod.json`
 
@@ -35,8 +37,9 @@ Use this as the first stop for quick discovery.
 
 - HUD layer registration: `FpsHudOverlay.register()` in `FpsHudOverlay.java`
 - HUD render method: `FpsHudOverlay.render(...)`
-- Toggle click handling: `FpsHudOverlay.handleClick(...)`
+- Shared toggle state methods: `FpsHudOverlay.toggleHud()`, `setHudShown(...)`, `isHudShown()`
 - 1-second FPS sampling: `ClientTickEvents.END_CLIENT_TICK` block in `FpsHudOverlay.java`
+- Screen-button registration: `FpsHudScreenButton.register()` (`ScreenEvents.AFTER_INIT`)
 - Config file path runtime target: `config/fpsmod/hud.properties`
 
 ## Logging conventions
@@ -63,3 +66,7 @@ Use this as the first stop for quick discovery.
 - UI/HUD-only changes: `src/client/java/com/fpsmod/client/`
 - Cross-cutting metadata changes: `fabric.mod.json` + `gradle.properties` + `README.md`
 - Version upgrades: always update both `gradle.properties` and README compatibility table.
+
+## Git / upstream
+
+- Default remote is set when you clone; this template was pushed to `https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod` (update `contact` in `fabric.mod.json` if your fork lives elsewhere).

@@ -7,7 +7,12 @@
   "authors": [
     "You"
   ],
+  "contact": {
+    "homepage": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod",
+    "sources": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod"
+  },
   "license": "CC0-1.0",
+  "icon": "assets/fpsmod/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
