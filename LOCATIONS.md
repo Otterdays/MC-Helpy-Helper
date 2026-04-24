@@ -1,0 +1,65 @@
+# LOCATIONS.md — quick codebase map
+
+Use this as the first stop for quick discovery.
+
+## First-check workflow (for future agents/builders)
+
+1. Read `LOCATIONS.md` (this file) for fast pathing.
+2. Read `README.md` for behavior, compatibility, and run/test commands.
+3. Read `build.gradle` and `gradle.properties` before changing versions/deps.
+4. Read `src/main/resources/fabric.mod.json` before changing IDs/entrypoints.
+
+## Core implementation
+
+- Main mod initializer: `src/main/java/com/fpsmod/FpsMod.java`
+- Client initializer: `src/client/java/com/fpsmod/FpsModClient.java`
+- FPS HUD feature: `src/client/java/com/fpsmod/client/FpsHudOverlay.java`
+- FPS HUD config persistence: `src/client/java/com/fpsmod/client/FpsHudConfig.java`
+- Unit test starter: `src/test/java/com/fpsmod/FpsModTest.java`
+
+## Mod metadata + wiring
+
+- Mod metadata and entrypoints: `src/main/resources/fabric.mod.json`
+- Mod id constant: `FpsMod.MOD_ID` in `src/main/java/com/fpsmod/FpsMod.java`
+- Client entrypoint target class: `com.fpsmod.FpsModClient` in `fabric.mod.json`
+
+## Build + toolchain
+
+- Gradle build config: `build.gradle`
+- Version pins (Minecraft/Fabric/Loader/Loom): `gradle.properties`
+- Project name + plugin repos: `settings.gradle`
+- Windows build shortcut: `build.bat`
+- Gradle wrappers: `gradlew.bat`, `gradlew`, `gradle/wrapper/`
+
+## Feature behavior map (FPS HUD)
+
+- HUD layer registration: `FpsHudOverlay.register()` in `FpsHudOverlay.java`
+- HUD render method: `FpsHudOverlay.render(...)`
+- Toggle click handling: `FpsHudOverlay.handleClick(...)`
+- 1-second FPS sampling: `ClientTickEvents.END_CLIENT_TICK` block in `FpsHudOverlay.java`
+- Config file path runtime target: `config/fpsmod/hud.properties`
+
+## Logging conventions
+
+- Startup + debug log patterns: `src/main/java/com/fpsmod/FpsMod.java`
+- HUD toggle log (`🔁`): `src/client/java/com/fpsmod/client/FpsHudOverlay.java`
+- Rule: keep emoji prefixes for high-visibility console scanning.
+
+## Commands you will use most
+
+- Build jar: `gradlew.bat build` (or `build.bat`)
+- Run dev client: `gradlew.bat runClient`
+- Run tests: `gradlew.bat test`
+
+## Output paths
+
+- Main mod jar: `build/libs/fps-mod-1.0.0.jar`
+- Sources jar: `build/libs/fps-mod-1.0.0-sources.jar`
+- Test report: `build/reports/tests/test/index.html`
+- Gradle problems report: `build/reports/problems/problems-report.html`
+
+## Safe-edit hotspots
+
+- UI/HUD-only changes: `src/client/java/com/fpsmod/client/`
+- Cross-cutting metadata changes: `fabric.mod.json` + `gradle.properties` + `README.md`
+- Version upgrades: always update both `gradle.properties` and README compatibility table.

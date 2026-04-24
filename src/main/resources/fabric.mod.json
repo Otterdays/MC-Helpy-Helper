@@ -3,7 +3,7 @@
   "id": "fpsmod",
   "version": "${version}",
   "name": "FPS Mod",
-  "description": "Minimal Fabric starter — logs once on game load.",
+  "description": "Fabric starter with a lightweight FPS HUD (1s refresh) and toggle.",
   "authors": [
     "You"
   ],
@@ -12,6 +12,9 @@
   "entrypoints": {
     "main": [
       "com.fpsmod.FpsMod"
+    ],
+    "client": [
+      "com.fpsmod.FpsModClient"
     ]
   },
   "depends": {

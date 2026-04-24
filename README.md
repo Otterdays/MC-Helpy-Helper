@@ -9,6 +9,27 @@
 
 Minimal Fabric starter repo for Minecraft 26.1.2. This is intentionally tiny and meant to be duplicated as your starting point, then extended.
 
+## First check (before editing)
+
+1. Read `LOCATIONS.md` first for quick file/symbol discovery.
+2. Then use this README for behavior, compatibility, and run/test commands.
+
+## What this template does right now
+
+- Registers a Fabric mod entrypoint (`ModInitializer`)
+- Registers a **client** entrypoint (`ClientModInitializer`) with a tiny HUD feature
+- Logs clear startup status lines with emoji markers
+- **In-game FPS overlay (lightweight)** — top-left HUD, **updates once per second** (no per-frame FPS math), vanilla-style bordered control
+- **Toggle** — click **Hide FPS / Show FPS** to enable/disable the numeric readout (button stays so you can turn it back on). Setting is saved under `config/fpsmod/hud.properties`
+- Builds a valid mod jar for `mods/` using pinned Fabric + Minecraft versions (includes `src/client/java` via Loom split source sets)
+- Includes a starter JUnit 5 test harness
+
+### In-game FPS HUD (behavior)
+
+- Renders as a Fabric [`HudElementRegistry`](https://maven.fabricmc.net/docs/fabric-api-0.146.1+26.1.2/net/fabricmc/fabric/api/client/rendering/v1/hud/HudElementRegistry.html) layer **before** `VanillaHudElements.MISC_OVERLAYS`, so it stacks like normal HUD content and respects **Hide HUD** (`F1`).
+- **FPS value** is sampled from the client’s built-in FPS counter **at most once per second** to keep work minimal.
+- **Click** the control while **no screen** is open (not in inventory/pause) to toggle. The log prints `🔁` when the state changes.
+
 ## Tech stack (at a glance)
 
 - Minecraft: `26.1.2`
@@ -16,6 +37,7 @@ Minimal Fabric starter repo for Minecraft 26.1.2. This is intentionally tiny and
 - API: `Fabric API 0.146.1+26.1.2`
 - Language/runtime: `Java 25+`
 - Build: `Gradle 9.4.1` + `Fabric Loom 1.16-SNAPSHOT`
+- Layout: **split** `main` + `client` source sets (see `build.gradle` `loom { splitEnvironmentSourceSets() ... }`)
 
 ## Version compatibility
 
@@ -66,14 +88,64 @@ Optional dev client:
 gradlew.bat runClient
 ```
 
+Run unit tests:
+
+```bat
+gradlew.bat test
+```
+
+## Debug logging convention
+
+This template uses emoji-prefixed logs to make startup diagnostics easy to scan in the console:
+
+- `🔍` debug/trace lifecycle details
+- `✅` successful readiness checkpoints
+- `⚠️` warning states that are non-fatal
+
+Current startup debug output includes:
+- initialization start
+- Java version, detected Minecraft version, mod version
+- ready heartbeat on successful load
+- environment notice (dev vs non-dev)
+
+If you add new logs, keep the emoji prefix so important lines stay visually obvious.
+
+Example log lines:
+
+```text
+🔍 Starting mod initialization...
+🔍 Environment: java=25, minecraft=26.1.2, modVersion=1.0.0
+✅ fpsmod loaded and ready.
+```
+
+When you toggle the HUD control in-game, look for:
+
+```text
+fpsmod 🔁 FPS HUD enabled
+fpsmod 🔁 FPS HUD disabled
+```
+
+## Test strategy (template baseline)
+
+This repo includes a tiny JUnit 5 test setup (`gradlew.bat test`) with a starter test in `src/test/java`.
+
+Current test file:
+- `src/test/java/com/fpsmod/FpsModTest.java` (template sanity check for `MOD_ID`)
+
+Recommended growth path:
+1. Keep **unit tests** for pure logic/helpers (fast, no game runtime needed).
+2. Add **integration checks** for config/resource loading where possible.
+3. Use `runClient` smoke checks for gameplay behavior that requires Minecraft runtime (ex: confirm the FPS HUD renders, toggles, and writes `config/fpsmod/hud.properties`).
+
 ## After you duplicate this repo
 
 1. **Mod id** — change `fpsmod` in `src/main/resources/fabric.mod.json` and in code (`FpsMod.MOD_ID`).
-2. **Maven group / package** — replace `com.fpsmod` (Java package + `maven_group` in `gradle.properties`).
-3. **Project name** — update `rootProject.name` in `settings.gradle` if you want a different Gradle project name.
-4. **Display name** — edit `name` / `description` in `fabric.mod.json`.
-5. **License** — replace `LICENSE` and the `license` field in `fabric.mod.json` if you are not using CC0.
-6. **Compatibility** — when you change Minecraft or Fabric versions, update `gradle.properties`, `fabric.mod.json` `depends`, and this README’s compatibility table so they stay in sync.
+2. **Client entrypoint** — update `fabric.mod.json` → `entrypoints.client` if you rename `FpsModClient`.
+3. **Maven group / package** — replace `com.fpsmod` (Java package + `maven_group` in `gradle.properties`).
+4. **Project name** — update `rootProject.name` in `settings.gradle` if you want a different Gradle project name.
+5. **Display name** — edit `name` / `description` in `fabric.mod.json`.
+6. **License** — replace `LICENSE` and the `license` field in `fabric.mod.json` if you are not using CC0.
+7. **Compatibility** — when you change Minecraft or Fabric versions, update `gradle.properties`, `fabric.mod.json` `depends`, and this README’s compatibility table so they stay in sync.
 
 ## License
 
