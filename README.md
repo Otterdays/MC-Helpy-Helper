@@ -14,7 +14,7 @@
 </p>
 <p align="center">
   <img alt="Client only" src="https://img.shields.io/badge/Environment-client-5865F2?style=for-the-badge" />
-  <a href="https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-CC0%201.0-555555?style=for-the-badge" /></a>
+  <a href="https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-All%20Rights%20Reserved-555555?style=for-the-badge" /></a>
   <a href="https://github.com/FabricMC/fabric-example-mod"><img alt="Template lineage" src="https://img.shields.io/badge/Template-fabric--example--mod-0E0E0E?style=for-the-badge&logo=github&logoColor=white" /></a>
 </p>
 
@@ -184,9 +184,9 @@ Recommended growth path:
 4. **Project name** — update `rootProject.name` in `settings.gradle` if you want a different Gradle project name.
 5. **Display name** — edit `name` / `description` in `fabric.mod.json`.
 6. **Mod panel metadata** — update `authors`, all `contact` fields (`homepage`, `sources`, `issues`), and `icon` in `fabric.mod.json` for Prism/MultiMC/Mod Menu display. Adjust or remove `suggests.modmenu` if you prefer a minimal `fabric.mod.json`.
-7. **License** — replace `LICENSE` and the `license` field in `fabric.mod.json` if you are not using CC0.
+7. **License** — this project ships with **all rights reserved**; adjust `LICENSE` and `license` in `fabric.mod.json` if you re-release under different terms.
 8. **Compatibility** — when you change Minecraft or Fabric versions, update `gradle.properties`, `fabric.mod.json` `depends`, and this README’s compatibility table so they stay in sync.
 
 ## License
 
-See `LICENSE` (CC0-1.0 as shipped; change after forking if you need a different license).
+**All rights reserved** — not open source. See [`LICENSE`](LICENSE) for the full notice.

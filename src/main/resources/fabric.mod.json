@@ -5,14 +5,14 @@
   "name": "FPS Mod",
   "description": "Lightweight FPS counter on the HUD (1s refresh) with a simple show/hide toggle.",
   "authors": [
-    "You"
+    "otterdays"
   ],
   "contact": {
     "homepage": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod",
     "sources": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod",
     "issues": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod/issues"
   },
-  "license": "CC0-1.0",
+  "license": "LicenseRef-All-Rights-Reserved",
   "icon": "assets/fpsmod/icon.png",
   "environment": "client",
   "entrypoints": {
