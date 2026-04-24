@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "fpsmod",
+  "version": "${version}",
+  "name": "FPS Mod",
+  "description": "Minimal Fabric starter — logs once on game load.",
+  "authors": [
+    "You"
+  ],
+  "license": "CC0-1.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.fpsmod.FpsMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.2",
+    "minecraft": "~26.1.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
