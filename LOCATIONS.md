@@ -6,7 +6,7 @@ Use this as the first stop for quick discovery.
 
 1. Read `LOCATIONS.md` (this file) for fast pathing.
 2. Read `README.md` for behavior, compatibility, and run/test commands.
-3. Read `build.gradle` and `gradle.properties` before changing versions/deps.
+3. Read `build.gradle` and `gradle.properties` before changing versions/deps; read `gradle/wrapper/gradle-wrapper.properties` when changing the Gradle distribution.
 4. Read `src/main/resources/fabric.mod.json` before changing IDs/entrypoints.
 
 ## Core implementation
@@ -29,6 +29,7 @@ Use this as the first stop for quick discovery.
 
 - Gradle build config: `build.gradle`
 - Version pins (Minecraft/Fabric/Loader/Loom): `gradle.properties`
+- **Gradle wrapper** (exact distribution ZIP): `gradle/wrapper/gradle-wrapper.properties` — this repo uses a **9.6 nightly** from `services.gradle.org/distributions-snapshots/` (not `distributions/`).
 - Project name + plugin repos: `settings.gradle`
 - Windows build shortcut: `build.bat`
 - Gradle wrappers: `gradlew.bat`, `gradlew`, `gradle/wrapper/`
@@ -65,7 +66,7 @@ Use this as the first stop for quick discovery.
 
 - UI/HUD-only changes: `src/client/java/com/fpsmod/client/`
 - Cross-cutting metadata changes: `fabric.mod.json` + `gradle.properties` + `README.md`
-- Version upgrades: always update both `gradle.properties` and README compatibility table.
+- Version upgrades: keep `gradle.properties`, `gradle/wrapper/gradle-wrapper.properties` (when bumping Gradle), and this README’s compatibility table aligned.
 
 ## Git / upstream
 

@@ -9,7 +9,7 @@
 <p align="center">
   <img alt="Java" src="https://img.shields.io/badge/Java-25%2B-F40404?style=for-the-badge&logo=openjdk&logoColor=white" />
   <img alt="Loom" src="https://img.shields.io/badge/Loom-1.16--SNAPSHOT-7C4DFF?style=for-the-badge" />
-  <img alt="Gradle" src="https://img.shields.io/badge/Gradle-9.4.1-02303A?style=for-the-badge&logo=gradle&logoColor=white" />
+  <img alt="Gradle" src="https://img.shields.io/badge/Gradle-9.6.0--nightly-02303A?style=for-the-badge&logo=gradle&logoColor=white" />
   <img alt="Mod version" src="https://img.shields.io/badge/Mod-1.0.0-007EC6?style=for-the-badge" />
 </p>
 <p align="center">
@@ -75,12 +75,12 @@ Fabric reads `fabric.mod.json` for the name, description, authors, license, `con
 - Mod loader: `Fabric Loader 0.19.2`
 - API: `Fabric API 0.146.1+26.1.2`
 - Language/runtime: `Java 25+`
-- Build: `Gradle 9.4.1` + `Fabric Loom 1.16-SNAPSHOT`
+- Build: `Gradle 9.6.0-20260424005419+0000` (nightly) + `Fabric Loom 1.16-SNAPSHOT`
 - Layout: **split** `main` + `client` source sets (see `build.gradle` `loom { splitEnvironmentSourceSets() ... }`)
 
 ## Version compatibility
 
-These versions are declared in `gradle.properties` and `src/main/resources/fabric.mod.json`. Keep them in sync when upgrading.
+These versions are declared in `gradle.properties`, `src/main/resources/fabric.mod.json`, and (for Gradle) `gradle/wrapper/gradle-wrapper.properties`. Keep them in sync when upgrading.
 
 | Component | Version | Notes |
 |-----------|---------|--------|
@@ -88,8 +88,9 @@ These versions are declared in `gradle.properties` and `src/main/resources/fabri
 | **Fabric Loader** | **0.19.2** | `loader_version` for Gradle; `fabric.mod.json` requires `fabricloader` **>= 0.19.2**. |
 | **Fabric API** | **0.146.1+26.1.2** | `fabric_api_version` — use this (or a compatible newer API for **26.1.2**) in-game. |
 | **Java** | **25+** | Required by Minecraft 26.x; `fabric.mod.json` depends on `java` **>= 25**. |
+| **Gradle** | **9.6.0-20260424005419+0000** (nightly) | Wrapper pins this in `gradle/wrapper/gradle-wrapper.properties` (`distributionUrl`). Nightly ZIPs live under [`distributions-snapshots`](https://services.gradle.org/distributions-snapshots/); stable releases use `.../distributions/gradle-<version>-bin.zip`. |
 
-Build tooling: **Fabric Loom** is set to **1.16-SNAPSHOT** in `gradle.properties` (see [Fabric develop](https://fabricmc.net/develop) when upgrading).
+Build tooling: **Fabric Loom** is set to **1.16-SNAPSHOT** in `gradle.properties` (see [Fabric develop](https://fabricmc.net/develop) when upgrading). Resolved Loom may report a patch (e.g. `1.16.1`) at configure time.
 
 Versions are aligned with the official [Fabric example mod](https://github.com/FabricMC/fabric-example-mod) **26.1.2** template line.
 
@@ -185,7 +186,7 @@ Recommended growth path:
 5. **Display name** — edit `name` / `description` in `fabric.mod.json`.
 6. **Mod panel metadata** — update `authors`, all `contact` fields (`homepage`, `sources`, `issues`), and `icon` in `fabric.mod.json` for Prism/MultiMC/Mod Menu display. Adjust or remove `suggests.modmenu` if you prefer a minimal `fabric.mod.json`.
 7. **License** — this project ships with **all rights reserved**; adjust `LICENSE` and `license` in `fabric.mod.json` if you re-release under different terms.
-8. **Compatibility** — when you change Minecraft or Fabric versions, update `gradle.properties`, `fabric.mod.json` `depends`, and this README’s compatibility table so they stay in sync.
+8. **Compatibility** — when you change Minecraft, Fabric, or **Gradle** versions, update `gradle.properties`, `fabric.mod.json` `depends`, `gradle/wrapper/gradle-wrapper.properties` (if the wrapper changes), and this README’s compatibility table so they stay in sync.
 
 ## License
 
