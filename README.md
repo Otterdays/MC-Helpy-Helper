@@ -27,7 +27,7 @@
   <sub>In-repo artwork (for launcher / Mod Menu icon fields)</sub><br />
   <a href="src/main/resources/assets/fpsmod/icon.png"><img src="src/main/resources/assets/fpsmod/icon.png" width="120" height="120" alt="Default mod icon (full)" /></a>
   &nbsp;&nbsp;
-  <a href="src/main/resources/assets/fpsmod/icon_modrinth_cropped.png"><img src="src/main/resources/assets/fpsmod/icon_modrinth_cropped.png" width="120" height="120" alt="Cropped icon variant" /></a>
+  <a href="readme-assets/icon_modrinth_cropped.png"><img src="readme-assets/icon_modrinth_cropped.png" width="120" height="120" alt="Cropped icon variant" /></a>
 </p>
 
 **FPS Mod** is a tiny [Fabric](https://fabricmc.net/) **client** mod: a top-left **FPS readout** (refreshed about once per second) and a **show/hide** control, with clear logs. This repository stays intentionally small: use it as a **template** to fork and extend, or drop the JAR in `mods` as-is.
@@ -120,7 +120,11 @@ Or:
 gradlew.bat build
 ```
 
-The mod JAR for your `mods` folder is **`build\libs\fps-mod-1.0.0.jar`** (name follows `mod_version` in `gradle.properties`). Use **Minecraft 26.1.2** with **Fabric Loader 0.19.2+** and a matching **Fabric API** (see compatibility table).
+The mod JAR for your `mods` folder is **`BUILT\libs\fps-mod-1.0.0.jar`** (name follows `mod_version` in `gradle.properties`; Gradle writes all build outputs under **`BUILT`**). Use **Minecraft 26.1.2** with **Fabric Loader 0.19.2+** and a matching **Fabric API** (see compatibility table).
+
+Launcher hosts (e.g. Modrinth) reject or flag jars that balloon from huge **in-jar PNGs**. Keep **`assets/<mod id>/icon.png`** to a modest resolution (this repo uses a 256px-side optimized PNG). Assets used only for the GitHub readme should live outside `src/main/resources` (see `readme-assets/`) so they are not packaged into the mod.
+
+Upload **`fps-mod-<version>.jar`** only—not the `-sources.jar` next to it.
 
 Optional dev client:
 

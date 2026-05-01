@@ -3,6 +3,8 @@ plugins {
     id 'maven-publish'
 }
 
+layout.buildDirectory = layout.projectDirectory.dir("BUILT")
+
 version = project.mod_version
 group = project.maven_group
 

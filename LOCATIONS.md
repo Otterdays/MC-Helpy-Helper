@@ -22,6 +22,7 @@ Use this as the first stop for quick discovery.
 
 - Mod metadata and entrypoints: `src/main/resources/fabric.mod.json` (`environment: client` → Mod Menu **Client** badge; `contact.issues` → Mod Menu **Issues** link; optional `suggests.modmenu` for nicer in-game mod list when Mod Menu is installed)
 - Prism/MultiMC mod icon asset: `src/main/resources/assets/fpsmod/icon.png`
+- Readme-only cropped icon (not packaged in the mod JAR): `readme-assets/icon_modrinth_cropped.png`
 - Mod id constant: `FpsMod.MOD_ID` in `src/main/java/com/fpsmod/FpsMod.java`
 - Client entrypoint target class: `com.fpsmod.FpsModClient` in `fabric.mod.json`
 
@@ -57,10 +58,10 @@ Use this as the first stop for quick discovery.
 
 ## Output paths
 
-- Main mod jar: `build/libs/fps-mod-1.0.0.jar`
-- Sources jar: `build/libs/fps-mod-1.0.0-sources.jar`
-- Test report: `build/reports/tests/test/index.html`
-- Gradle problems report: `build/reports/problems/problems-report.html`
+- Main mod jar: `BUILT/libs/fps-mod-1.0.0.jar`
+- Sources jar: `BUILT/libs/fps-mod-1.0.0-sources.jar`
+- Test report: `BUILT/reports/tests/test/index.html`
+- Gradle problems report: `BUILT/reports/problems/problems-report.html`
 
 ## Safe-edit hotspots
 

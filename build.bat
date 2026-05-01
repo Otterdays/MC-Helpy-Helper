@@ -11,6 +11,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Done. Mod JAR^(s^) in build\libs\
-dir /b "build\libs\*.jar" 2>nul
+echo Done. Outputs in BUILT\libs\
+echo Use the main mod (no "-sources" in the name) for Modrinth/mods folder.
+dir /b "BUILT\libs\*.jar" 2>nul
 exit /b 0
