@@ -2,6 +2,29 @@
 
 # SCRATCHPAD
 
+## 2026-05-06 [AMENDED-3]
+
+### Active Tasks
+
+- Finalize top-header polish in `HelpHelperScreen` while preserving visibility at high UI scale.
+
+### Blockers
+
+- No blocker; awaiting user visual sign-off after compact header pass.
+
+### Last 5 Actions
+
+1. Analyzed real build errors from terminal output and fixed malformed `CFG.*` declarations.
+2. Repaired switch-case key bindings to compile-time constants and restored successful builds.
+3. Addressed hidden search/control clipping with additional top layout reserve and overflow scaling.
+4. Applied compact/professional header refinements (reduced header height, tighter row spacing, cleaner strip sizing).
+5. Verified changes by rebuilding with `build.bat` (`BUILD SUCCESSFUL`).
+
+### Next Steps
+
+- User visual QA on target UI scale.
+- If needed, apply fixed-height top panel fallback for guaranteed visibility.
+
 ## 2026-05-06 [AMENDED-2]
 
 ### Active Tasks

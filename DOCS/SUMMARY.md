@@ -2,6 +2,13 @@
 
 # SUMMARY
 
+## 2026-05-06 Status Snapshot [AMENDED]
+
+- Mod: Help Helper (`/help` command browser for Fabric).
+- Focus area: top-header UX stability and compact visual polish.
+- Recent result: fixed compile regressions from prior refactor and restored green builds.
+- Current priority: final in-game visual validation for search/control visibility at problematic UI scales.
+
 ## 2026-05-06 Status Snapshot
 
 - Mod: Help Helper (`/help` command browser for Fabric).
