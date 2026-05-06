@@ -9,18 +9,28 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
-/** Server → client: command list to populate the help GUI. */
-public record OpenHelpPayload(List<String> commands) implements CustomPacketPayload {
+/** Server -> client: command list to populate the help GUI. */
+public record OpenHelpPayload(List<CommandEntry> commands) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<OpenHelpPayload> TYPE =
         new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(HelpHelper.MOD_ID, "open_help"));
 
+    public static final StreamCodec<RegistryFriendlyByteBuf, CommandEntry> COMMAND_ENTRY_CODEC = StreamCodec.composite(
+        ByteBufCodecs.STRING_UTF8,
+        CommandEntry::command,
+        ByteBufCodecs.STRING_UTF8,
+        CommandEntry::root,
+        CommandEntry::new);
+
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenHelpPayload> CODEC = StreamCodec.composite(
-        ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.STRING_UTF8),
+        ByteBufCodecs.collection(ArrayList::new, COMMAND_ENTRY_CODEC),
         OpenHelpPayload::commands,
         OpenHelpPayload::new);
 
     @Override
     public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return TYPE;
+    }
+
+    public record CommandEntry(String command, String root) {
     }
 }

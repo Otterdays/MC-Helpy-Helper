@@ -1,4 +1,4 @@
-# Help Helper — `/help` as a searchable command browser (Fabric)
+# Help Helper - `/help` as a searchable command browser (Fabric)
 
 <!-- Badges: versions in gradle.properties and fabric.mod.json -->
 <p align="center">
@@ -14,29 +14,45 @@
   <a href="https://github.com/Otterdays/MC-Helpy-Helper"><img alt="Repository" src="https://img.shields.io/badge/Source-MC--Helpy--Helper-24292f?style=for-the-badge&logo=github&logoColor=white" /></a>
 </p>
 
-**Help Helper** is a small [Fabric](https://fabricmc.net/) mod for **Minecraft Java 26.1.2**: when you run **`/help`**, the server sends your client a snapshot of commands you may use (from Brigadier usage + permission gates), and the client opens a **large, Minecraft-styled UI**—search box, clickable rows that run each command via the normal **`sendUnattendedCommand`** path, and scrolling.
+**Help Helper** is a small [Fabric](https://fabricmc.net/) mod for **Minecraft Java 26.1.2**. When you run **`/help`**, the server sends your client a snapshot of commands you may use, and the client opens a large in-game browser with search, categories, action modes, templates, and scrolling.
 
 Upstream home for packaging and releases: [Otterdays/MC-Helpy-Helper](https://github.com/Otterdays/MC-Helpy-Helper).
 
 ## Requirements
 
 - Minecraft **26.1.2**, Fabric Loader pinned in [`gradle.properties`](gradle.properties).
-- [**Fabric API**](https://modrinth.com/mod/fabric-api) on both **client** and **server** (the mod declares `fabric-api`).
+- [**Fabric API**](https://modrinth.com/mod/fabric-api) on both **client** and **server**.
 - Java **25+** per `fabric.mod.json`.
 
-## Behavior (MVP)
+## Features
 
-- **`/help`** (logical server command): if the issuer is a **player**, the server aggregates usable command paths for that source’s permissions and sends them to **that player’s client** in an S2C payload; the client opens `Help Helper` screen listing `/…` strings.
-- **Search** filters rows (substring, case-insensitive).
-- **Click** a row: runs the slash command (`Commands.trimOptionalPrefix`), then closes the screen.
-- **Scroll** wheel over the list area scrolls the list.
+- **Searchable GUI** - Full-window command browser with real-time search
+- **Command Details** - Selected command shows category, aliases, risk label, and templates
+- **Click Actions** - Run commands, copy to clipboard, or fill chat box
+- **Categories** - Filter by command family and vanilla command groups
+- **Display Modes** - Toggle compact or roomy row spacing
+- **Keyboard Navigation** - Arrow keys, Page Up/Down, Home/End
+- **Scrollbar** - Mouse wheel, drag scrollbar, or click track for page scrolling
+- **Vanilla Catalog** - Known Minecraft commands get descriptions, aliases, and templates
+- **Permission-Aware** - Only shows commands the player can use
 
-Non-players requesting `/help` get a chat error (GUI is intentionally player-focused).
+## Behavior
 
-### Limitations / expectations
+- **`/help`** (logical server command): if the issuer is a **player**, the server aggregates usable command paths for that source's permissions and sends them to that player's client in an S2C payload; the client opens `Help Helper`.
+- **Search** filters rows across command text, category, aliases, and description.
+- **Click** a row: runs the command, copies it, or fills chat depending on selected mode.
+- **Templates** on the right panel open in chat for editing.
+- **Risky commands** default to fill-chat when run mode is selected.
+- **Scroll** wheel over the list area scrolls the list; track click pages; thumb drag works.
+
+Non-players requesting `/help` get a chat error.
+
+### Limitations / Expectations
 
 - The mod must load on **the server your client is executing commands against**. Vanilla servers will not react to `/help` with this GUI.
-- Dedicated servers hosting only this mod jar will advertise the custom payload Fabric networking expects clients to understand; vanilla clients connecting to those servers are unsupported (use a Fabric client with Help Helper/Fabric networking stack).
+- Dedicated servers hosting only this mod jar will advertise the custom payload Fabric networking expects clients to understand; vanilla clients connecting to those servers are unsupported.
+- Command metadata is curated for common vanilla commands. Unknown server/mod commands still fall back to a generic entry.
+- The UI shows command paths plus selected metadata, not full Brigadier syntax trees for every command.
 
 ## Building
 
@@ -46,15 +62,46 @@ Non-players requesting `/help` get a chat error (GUI is intentionally player-foc
 
 Artifacts land under **`BUILT/libs/`** (see [`build.gradle`](build.gradle): `layout.buildDirectory`).
 
-Developers can use `.\gradlew.bat runClient` / `runServer` once [Fabric runs](https://docs.fabricmc.net/develop/getting-started/setup) are wired as usual—this repo keeps Fabric Loom pinned for 26.1.2.
+Developers can use `.\gradlew.bat runClient` / `runServer` once [Fabric runs](https://docs.fabricmc.net/develop/getting-started/setup) are wired as usual. This repo keeps Fabric Loom pinned for 26.1.2.
 
-## Project layout
+## Project Layout
 
-- Main entry + payload registration + `/help`: `src/main/java/com/otterdays/helphelper/`
-- Payload type: [`OpenHelpPayload`](src/main/java/com/otterdays/helphelper/network/OpenHelpPayload.java)
-- Screen + receiver: `src/client/java/com/otterdays/helphelper/client/`
-- Metadata: [`src/main/resources/fabric.mod.json`](src/main/resources/fabric.mod.json)
+```
+src/
+|- main/java/com/otterdays/helphelper/
+|  |- HelpHelper.java              # Main mod initializer
+|  |- HelpHelperCommands.java      # /help command registration
+|  |- HelpCommandsSupport.java     # Brigadier tree traversal
+|  `- network/
+|     `- OpenHelpPayload.java      # S2C network payload
+|- client/java/com/otterdays/helphelper/client/
+|  |- CommandCatalog.java          # Client-side vanilla command metadata
+|  |- HelpHelperClient.java        # Client initializer + receiver
+|  `- HelpHelperScreen.java        # Full-window GUI screen
+|- test/java/com/otterdays/helphelper/
+|  `- HelpHelperTest.java          # Unit tests
+`- main/resources/
+   |- fabric.mod.json              # Mod metadata
+   `- assets/helphelper/           # Mod assets (if any)
+```
+
+## Documentation
+
+- **Feature details**: [`DOCS/FEATURES.md`](DOCS/FEATURES.md)
+- **Codebase map**: [`LOCATIONS.md`](LOCATIONS.md)
+- **Build configuration**: [`build.gradle`](build.gradle), [`gradle.properties`](gradle.properties)
+
+## Known Issues & Improvements
+
+See [`DOCS/FEATURES.md`](DOCS/FEATURES.md) for planned enhancements:
+
+- Expand vanilla metadata coverage
+- Group commands by mod/namespace
+- Add favorite/bookmark functionality
+- Implement fuzzy search
+- Show required permission levels
+- Add config file for user preferences
 
 ## License
 
-See [LICENSE](LICENSE) (currently All Rights Reserved in template metadata—you may publish your own SPDX ID when releasing).
+See [LICENSE](LICENSE) (currently All Rights Reserved in template metadata; you may publish your own SPDX ID when releasing).
