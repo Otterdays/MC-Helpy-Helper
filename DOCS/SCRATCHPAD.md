@@ -2,6 +2,31 @@
 
 # SCRATCHPAD
 
+## 2026-05-06 [AMENDED]
+
+### Active Tasks
+
+- Debug and stabilize top control row layout in `HelpHelperScreen` for high UI scale/font sizes.
+- Verify no clipped text/buttons in search/action/density/done controls.
+
+### Blockers
+
+- No hard blocker; visual validation still needed in-game across multiple UI scales.
+
+### Last 5 Actions
+
+1. Reviewed current screen layout code and found fixed `controlHeight` usage.
+2. Switched control sizing to font-aware `Math.max(CFG.controlHeight, font + padding)`.
+3. Reworked list/header spacing to scale with control height instead of fixed top-space magic number.
+4. Removed duplicate `ARGB` import in `HelpHelperScreen` while touching the file.
+5. Prepared lint pass and doc checkpoint.
+
+### Next Steps
+
+- Run lint/compile check for touched file.
+- Validate screen at larger UI scale where top row was clipping.
+- Tune spacing constants only if clipping still appears in edge resolutions.
+
 ## 2026-05-06
 
 ### Active Tasks

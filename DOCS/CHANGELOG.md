@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Updated `HelpHelperScreen` top control layout to use font-aware control height and adaptive top spacing, fixing clipped/cut-off controls on larger UI scales.
+
 ### Added
 
 - Added `DOCS/ROADMAP.md` with phased UI edge-case and QoL checklist.

@@ -25,7 +25,6 @@ import net.minecraft.util.ARGB;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.otterdays.helphelper.network.OpenHelpPayload.CommandEntry;
-import net.minecraft.util.ARGB;
 
 /** Nearly full-window help browser with search, filtering, and flexible command actions. */
 public final class HelpHelperScreen extends Screen {
@@ -34,6 +33,27 @@ public final class HelpHelperScreen extends Screen {
     private static final List<String> CATEGORY_ORDER = List.of("Server/Modded", "Chat", "Social", "World",
         "Worldgen", "Player", "Movement", "Build", "Inventory", "Storage", "Entities", "Utility", "Debug",
         "Admin", "Server", "Visual", "Transport", "Advanced");
+    private static final int SCROLLBAR_WIDTH = 8;
+    private static final int SCROLLBAR_GAP = 2;
+    private static final int DETAIL_WIDTH = 190;
+    private static final int DETAIL_GAP = 10;
+    private static final int BADGE_WIDTH = 22;
+    private static final int MIN_CATEGORY_WIDTH = 46;
+    private static final int MAX_CATEGORY_WIDTH = 92;
+    private static final double PAGE_SCROLL_FACTOR = 0.88;
+
+    // GLFW key constants used by keyPressed switch.
+    private static final int KEY_DOWN = 264;
+    private static final int KEY_UP = 265;
+    private static final int KEY_PAGE_UP = 266;
+    private static final int KEY_PAGE_DOWN = 267;
+    private static final int KEY_HOME = 268;
+    private static final int KEY_END = 269;
+    private static final int KEY_ENTER = 257;
+    private static final int KEY_KP_ENTER = 335;
+    private static final int KEY_C = 67;
+    private static final int KEY_D = 68;
+    private static final int KEY_F = 70;
 
     private final List<CommandCatalog.CommandRow> allCommands;
     private final List<String> categories;
@@ -88,19 +108,19 @@ public final class HelpHelperScreen extends Screen {
         stateFile = stateFile == null ? defaultStateFile() : stateFile;
         scrollPixels = 0.0;
 
-        lineHeight = Math.max(compactRows ? 14 : 20, minecraft.font.lineHeight + (compactRows ? 5 : 10));
+        lineHeight = Math.max(CFG.lineHeight(compactRows), minecraft.font.lineHeight + CFG.verticalPadding(compactRows));
         computeListLayout();
 
-        int controlH = 22;
+        int controlH = Math.max(CFG.controlHeight, minecraft.font.lineHeight + 10);
         int topControls = margin() + minecraft.font.lineHeight + 42;
-        int gap = 6;
-        int closeW = 66;
-        int densityW = 78;
-        int actionW = Math.min(104, Math.max(72, (listRight - listLeft) / 5));
+        int gap = CFG.buttonGap;
+        int closeW = CFG.closeButtonWidth;
+        int densityW = CFG.densityButtonWidth;
+        int actionW = Math.min(CFG.actionButtonWidth, Math.max(72, (listRight - listLeft) / 5));
         int closeLeft = listRight - closeW;
         int densityLeft = closeLeft - gap - densityW;
         int actionLeft = densityLeft - gap - actionW;
-        int searchW = Math.max(100, actionLeft - listLeft - gap);
+        int searchW = Math.max(CFG.searchMinWidth, actionLeft - listLeft - gap);
 
         searchBox = new EditBox(minecraft.font, listLeft, topControls, searchW, controlH, Component.literal("Search"));
         searchBox.setResponder(this::applyFilter);
@@ -132,7 +152,7 @@ public final class HelpHelperScreen extends Screen {
     }
 
     private int margin() {
-        return Math.max(12, Math.min(width, height) / 42);
+        return Math.max(CFG.margin, Math.min(width, height) / 42);
     }
 
     private Path defaultStateFile() {
@@ -141,11 +161,16 @@ public final class HelpHelperScreen extends Screen {
 
     private void computeListLayout() {
         int m = margin();
+        int controlH = Math.max(CFG.controlHeight, minecraft.font.lineHeight + 10);
         listLeft = m;
         int available = Math.max(40, width - (m * 2));
-        int details = available >= 460 ? Math.min(DETAIL_WIDTH, available / 3) : 0;
-        listRight = Math.max(listLeft + 40, width - m - details - (details > 0 ? DETAIL_GAP : 0));
-        int topSpace = height < 250 ? 150 : 196;
+        int details = available >= 460 ? Math.min(CFG.detailPanelWidth, available / 3) : 0;
+        listRight = Math.max(listLeft + 40, width - m - details - (details > 0 ? CFG.detailPanelGap : 0));
+        int estimatedTopRows = 6;
+        int topSpace = estimatedTopRows * controlH + (minecraft.font.lineHeight * 2) + 46;
+        int minTopSpace = height < 250 ? 150 : 196;
+        topSpace = Math.max(minTopSpace, topSpace);
+        topSpace = Math.min(topSpace, Math.max(120, height - m - 84));
         listTop = m + minecraft.font.lineHeight + topSpace;
         listBottom = Math.max(listTop + 60, height - m);
 
@@ -179,7 +204,7 @@ public final class HelpHelperScreen extends Screen {
             if (rowY + buttonH >= listTop - 6) {
                 return;
             }
-            int needed = Math.max(MIN_CATEGORY_WIDTH, minecraft.font.width(category) + 24);
+            int needed = Math.max(CFG.minCategoryWidth, minecraft.font.width(category) + 24);
             if (x > listLeft && x + needed > listRight) {
                 rowY += buttonH + 4;
                 x = listLeft;
@@ -198,8 +223,8 @@ public final class HelpHelperScreen extends Screen {
             String label = filter.label();
             int count = filter.count(allCommands, favoriteCommands, recentCommands);
             String text = (quickFilter == filter ? "[" + label + "]" : label) + " " + count;
-            int w = Math.min(Math.max(MIN_CATEGORY_WIDTH, minecraft.font.width(text) + 18),
-                Math.max(MIN_CATEGORY_WIDTH, listRight - x));
+            int w = Math.min(Math.max(CFG.minCategoryWidth, minecraft.font.width(text) + 18),
+                Math.max(CFG.minCategoryWidth, listRight - x));
             if (x > listLeft && x + w > listRight) {
                 y += buttonH + 4;
                 x = listLeft;
@@ -207,8 +232,8 @@ public final class HelpHelperScreen extends Screen {
             if (y + buttonH >= listTop - 6) {
                 return;
             }
-            w = Math.min(Math.max(MIN_CATEGORY_WIDTH, minecraft.font.width(text) + 18),
-                Math.max(MIN_CATEGORY_WIDTH, listRight - x));
+            w = Math.min(Math.max(CFG.minCategoryWidth, minecraft.font.width(text) + 18),
+                Math.max(CFG.minCategoryWidth, listRight - x));
             addRenderableWidget(Button.builder(Component.literal(text), btn -> {
                 quickFilter = filter;
                 rebuildWidgetsKeepingSearch();
@@ -223,8 +248,8 @@ public final class HelpHelperScreen extends Screen {
         int gap = 5;
         for (SortMode mode : SortMode.values()) {
             String text = sortMode == mode ? "[" + mode.label() + "]" : mode.label();
-            int w = Math.min(Math.max(MIN_CATEGORY_WIDTH, minecraft.font.width(text) + 18),
-                Math.max(MIN_CATEGORY_WIDTH, listRight - x));
+            int w = Math.min(Math.max(CFG.minCategoryWidth, minecraft.font.width(text) + 18),
+                Math.max(CFG.minCategoryWidth, listRight - x));
             if (x > listLeft && x + w > listRight) {
                 y += buttonH + 4;
                 x = listLeft;
@@ -232,8 +257,8 @@ public final class HelpHelperScreen extends Screen {
             if (y + buttonH >= listTop - 6) {
                 return;
             }
-            w = Math.min(Math.max(MIN_CATEGORY_WIDTH, minecraft.font.width(text) + 18),
-                Math.max(MIN_CATEGORY_WIDTH, listRight - x));
+            w = Math.min(Math.max(CFG.minCategoryWidth, minecraft.font.width(text) + 18),
+                Math.max(CFG.minCategoryWidth, listRight - x));
             addRenderableWidget(Button.builder(Component.literal(text), btn -> {
                 sortMode = mode;
                 rebuildWidgetsKeepingSearch();
@@ -241,12 +266,12 @@ public final class HelpHelperScreen extends Screen {
             }).bounds(x, y, w, buttonH).build());
             x += w + gap;
         }
-        int clearW = Math.min(72, Math.max(MIN_CATEGORY_WIDTH, listRight - x));
-        if (clearW >= MIN_CATEGORY_WIDTH) {
+        int clearW = Math.min(72, Math.max(CFG.minCategoryWidth, listRight - x));
+        if (clearW >= CFG.minCategoryWidth) {
             if (x > listLeft && x + clearW > listRight) {
                 y += buttonH + 4;
                 x = listLeft;
-                clearW = Math.min(72, Math.max(MIN_CATEGORY_WIDTH, listRight - x));
+                clearW = Math.min(72, Math.max(CFG.minCategoryWidth, listRight - x));
             }
             if (y + buttonH >= listTop - 6) {
                 return;
@@ -266,10 +291,10 @@ public final class HelpHelperScreen extends Screen {
 
     private int addCategoryButton(String label, String category, int count, int x, int y, int h) {
         boolean selected = selectedCategory.equals(category);
-        int available = Math.max(MIN_CATEGORY_WIDTH, Math.min(MAX_CATEGORY_WIDTH, listRight - x));
+        int available = Math.max(CFG.minCategoryWidth, Math.min(CFG.maxCategoryWidth, listRight - x));
         String labelText = ellipsize(label, Math.max(8, available - 18 - minecraft.font.width(" " + count)));
         String text = (selected ? "> " : "") + labelText + " " + count;
-        int w = Math.min(Math.max(MIN_CATEGORY_WIDTH, minecraft.font.width(text) + 18), available);
+        int w = Math.min(Math.max(CFG.minCategoryWidth, minecraft.font.width(text) + 18), available);
         addRenderableWidget(Button.builder(Component.literal(text), btn -> {
             selectedCategory = category;
             rebuildWidgetsKeepingSearch();
@@ -378,7 +403,7 @@ public final class HelpHelperScreen extends Screen {
                 gfx.fill(listLeft + 2, yi, listLeft + 5, yi + lineHeight - 3, categoryColor(row.category()));
 
                 int badgeRight = contentRight() - 4;
-                int textRight = badgeRight - BADGE_WIDTH - 4;
+                int textRight = badgeRight - CFG.badgeWidth - 4;
                 int textX = listLeft + (favoriteCommands.contains(row.command()) ? 16 : 10);
                 String text = ellipsize(row.command(), textRight - textX);
                 int ty = yi + Math.max(0, (lineHeight - minecraft.font.lineHeight - 4) / 2);
@@ -390,7 +415,7 @@ public final class HelpHelperScreen extends Screen {
                 if (favoriteCommands.contains(row.command())) {
                     gfx.text(minecraft.font, "*", listLeft + 7, ty, ARGB.color(255, 255, 226, 120));
                 }
-                drawRowBadge(gfx, row, badgeRight - BADGE_WIDTH, yi + 3, badgeRight, yi + lineHeight - 6);
+                drawRowBadge(gfx, row, badgeRight - CFG.badgeWidth, yi + 3, badgeRight, yi + lineHeight - 6);
             }
         } finally {
             gfx.disableScissor();
@@ -415,22 +440,12 @@ public final class HelpHelperScreen extends Screen {
     }
 
     private int categoryColor(String category) {
-        return switch (category) {
-            case "Chat", "Social" -> ARGB.color(255, 94, 174, 220);
-            case "World", "Worldgen" -> ARGB.color(255, 106, 190, 116);
-            case "Player", "Movement", "Transport" -> ARGB.color(255, 238, 180, 88);
-            case "Build", "Inventory", "Storage" -> ARGB.color(255, 210, 150, 96);
-            case "Entities" -> ARGB.color(255, 222, 112, 120);
-            case "Utility", "Debug", "Advanced" -> ARGB.color(255, 176, 150, 232);
-            case "Admin", "Server" -> ARGB.color(255, 238, 118, 96);
-            case "Visual" -> ARGB.color(255, 118, 210, 190);
-            default -> ARGB.color(255, 150, 154, 178);
-        };
+        return CFG.categoryColor(category);
     }
 
     private void drawDetailsPanel(GuiGraphicsExtractor gfx, int mouseX, int mouseY) {
         presetHits = List.of();
-        int panelLeft = listRight + DETAIL_GAP;
+        int panelLeft = listRight + CFG.detailPanelGap;
         int panelRight = width - margin();
         if (panelRight - panelLeft < 140 || visible.isEmpty()) {
             return;
@@ -438,8 +453,8 @@ public final class HelpHelperScreen extends Screen {
 
         int panelTop = listTop;
         int panelBottom = listBottom;
-        gfx.fill(panelLeft, panelTop, panelRight, panelBottom, ARGB.color(120, 18, 22, 34));
-        outlineRect(gfx, panelLeft, panelTop, panelRight, panelBottom, ARGB.color(180, 82, 96, 140));
+        gfx.fill(panelLeft, panelTop, panelRight, panelBottom, CFG.parseColor(CFG.colorPanelBackground));
+        outlineRect(gfx, panelLeft, panelTop, panelRight, panelBottom, CFG.parseColor(CFG.colorScrollbar));
 
         CommandCatalog.CommandRow row = visible.get(selectedIndex >= 0 ? selectedIndex : 0);
         CommandCatalog.CommandInfo info = row.info();
@@ -449,9 +464,9 @@ public final class HelpHelperScreen extends Screen {
         int footerTop = Math.max(y + 72, panelBottom - 72);
 
         gfx.fill(panelLeft, panelTop, panelLeft + 3, panelBottom, categoryColor(info.category()));
-        gfx.text(minecraft.font, ellipsize(info.title(), maxW), x, y, ARGB.color(255, 255, 226, 120), true);
+        gfx.text(minecraft.font, ellipsize(info.title(), maxW), x, y, CFG.parseColor(CFG.colorFavoriteStar), true);
         y += minecraft.font.lineHeight + 8;
-        gfx.text(minecraft.font, ellipsize(row.command(), maxW), x, y, ARGB.color(255, 210, 245, 255), true);
+        gfx.text(minecraft.font, ellipsize(row.command(), maxW), x, y, CFG.parseColor(CFG.colorRiskyText), true);
         y += minecraft.font.lineHeight + 7;
         gfx.text(minecraft.font, info.category(), x, y, categoryColor(info.category()));
         y += minecraft.font.lineHeight + 6;
@@ -461,7 +476,7 @@ public final class HelpHelperScreen extends Screen {
         gfx.text(minecraft.font, source, x, y, sourceColor);
         y += minecraft.font.lineHeight + 8;
         if (info.risky()) {
-            gfx.text(minecraft.font, "Fills chat by default", x, y, ARGB.color(255, 255, 150, 118));
+            gfx.text(minecraft.font, "Fills chat by default", x, y, CFG.parseColor(CFG.colorSourceRisky));
             y += minecraft.font.lineHeight + 8;
         }
 
@@ -469,14 +484,14 @@ public final class HelpHelperScreen extends Screen {
             if (y + minecraft.font.lineHeight >= footerTop) {
                 break;
             }
-            gfx.text(minecraft.font, line, x, y, ARGB.color(255, 210, 214, 226));
+            gfx.text(minecraft.font, line, x, y, CFG.parseColor(CFG.colorDescription));
             y += minecraft.font.lineHeight + 2;
         }
 
         if (!info.aliases().isEmpty() && y + minecraft.font.lineHeight < footerTop) {
             y += 6;
             gfx.text(minecraft.font, "Aliases: " + String.join(", ", info.aliases()), x, y,
-                ARGB.color(255, 180, 186, 204));
+                CFG.parseColor(CFG.colorSourceModded));
             y += minecraft.font.lineHeight + 6;
         }
 
@@ -549,11 +564,11 @@ public final class HelpHelperScreen extends Screen {
     }
 
     private int scrollbarLeft() {
-        return listRight - SCROLLBAR_WIDTH;
+        return listRight - CFG.scrollbarWidth;
     }
 
     private int contentRight() {
-        return hasScrollableContent() ? scrollbarLeft() - SCROLLBAR_GAP : listRight - SCROLLBAR_GAP;
+        return hasScrollableContent() ? scrollbarLeft() - CFG.scrollbarGap : listRight - CFG.scrollbarGap;
     }
 
     private boolean isOverContent(double mx, double my) {
