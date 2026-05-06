@@ -1,26 +1,25 @@
 {
   "schemaVersion": 1,
-  "id": "fpsmod",
+  "id": "helphelper",
   "version": "${version}",
-  "name": "FPS Mod",
-  "description": "Lightweight FPS counter on the HUD (1s refresh) with a simple show/hide toggle.",
+  "name": "Help Helper",
+  "description": "Opens a full-window, searchable Minecraft-styled GUI when using /help, listing commands you can click to run.",
   "authors": [
-    "otterdays"
+    "Otterdays"
   ],
   "contact": {
-    "homepage": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod",
-    "sources": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod",
-    "issues": "https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod/issues"
+    "homepage": "https://github.com/Otterdays/MC-Helpy-Helper",
+    "sources": "https://github.com/Otterdays/MC-Helpy-Helper",
+    "issues": "https://github.com/Otterdays/MC-Helpy-Helper/issues"
   },
   "license": "LicenseRef-All-Rights-Reserved",
-  "icon": "assets/fpsmod/icon.png",
-  "environment": "client",
+  "environment": "*",
   "entrypoints": {
     "main": [
-      "com.fpsmod.FpsMod"
+      "com.otterdays.helphelper.HelpHelper"
     ],
     "client": [
-      "com.fpsmod.FpsModClient"
+      "com.otterdays.helphelper.client.HelpHelperClient"
     ]
   },
   "depends": {

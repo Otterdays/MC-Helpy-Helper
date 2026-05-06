@@ -11,20 +11,19 @@ Use this as the first stop for quick discovery.
 
 ## Core implementation
 
-- Main mod initializer: `src/main/java/com/fpsmod/FpsMod.java`
-- Client initializer: `src/client/java/com/fpsmod/FpsModClient.java`
-- FPS HUD feature: `src/client/java/com/fpsmod/client/FpsHudOverlay.java`
-- Screen-level FPS toggle button: `src/client/java/com/fpsmod/client/FpsHudScreenButton.java`
-- FPS HUD config persistence: `src/client/java/com/fpsmod/client/FpsHudConfig.java`
-- Unit test starter: `src/test/java/com/fpsmod/FpsModTest.java`
+- Main mod initializer: `src/main/java/com/otterdays/helphelper/HelpHelper.java`
+- `/help` registration + dispatcher usage collection: `src/main/java/com/otterdays/helphelper/HelpHelperCommands.java`, `HelpCommandsSupport.java`
+- Networking payload: `src/main/java/com/otterdays/helphelper/network/OpenHelpPayload.java`
+- Client initializer + receiver: `src/client/java/com/otterdays/helphelper/client/HelpHelperClient.java`
+- Full-window help GUI: `src/client/java/com/otterdays/helphelper/client/HelpHelperScreen.java`
+- Unit test: `src/test/java/com/otterdays/helphelper/HelpHelperTest.java`
 
 ## Mod metadata + wiring
 
-- Mod metadata and entrypoints: `src/main/resources/fabric.mod.json` (`environment: client` → Mod Menu **Client** badge; `contact.issues` → Mod Menu **Issues** link; optional `suggests.modmenu` for nicer in-game mod list when Mod Menu is installed)
-- Prism/MultiMC mod icon asset: `src/main/resources/assets/fpsmod/icon.png`
-- Readme-only cropped icon (not packaged in the mod JAR): `readme-assets/icon_modrinth_cropped.png`
-- Mod id constant: `FpsMod.MOD_ID` in `src/main/java/com/fpsmod/FpsMod.java`
-- Client entrypoint target class: `com.fpsmod.FpsModClient` in `fabric.mod.json`
+- Mod metadata and entrypoints: `src/main/resources/fabric.mod.json` (`environment` is `*` so the server can register `/help` and networking; optional `suggests.modmenu` when Mod Menu is installed)
+- Readme-only icon extras (legacy template): `readme-assets/icon_modrinth_cropped.png`
+- Mod id constant: `HelpHelper.MOD_ID` in `src/main/java/com/otterdays/helphelper/HelpHelper.java`
+- Client entrypoint target class: `com.otterdays.helphelper.client.HelpHelperClient` in `fabric.mod.json`
 
 ## Build + toolchain
 
@@ -35,20 +34,17 @@ Use this as the first stop for quick discovery.
 - Windows build shortcut: `build.bat`
 - Gradle wrappers: `gradlew.bat`, `gradlew`, `gradle/wrapper/`
 
-## Feature behavior map (FPS HUD)
+## Feature behavior map (Help Helper)
 
-- HUD layer registration: `FpsHudOverlay.register()` in `FpsHudOverlay.java`
-- HUD render method: `FpsHudOverlay.render(...)`
-- Shared toggle state methods: `FpsHudOverlay.toggleHud()`, `setHudShown(...)`, `isHudShown()`
-- 1-second FPS sampling: `ClientTickEvents.END_CLIENT_TICK` block in `FpsHudOverlay.java`
-- Screen-button registration: `FpsHudScreenButton.register()` (`ScreenEvents.AFTER_INIT`)
-- Config file path runtime target: `config/fpsmod/hud.properties`
+- S2C payload registration: `HelpHelper.onInitialize()`
+- `/help` server registration: `HelpHelperCommands.register()` via `CommandRegistrationCallback`
+- Command path collection / permission-aware Brigadier traversal: `HelpCommandsSupport.collectFor(CommandSourceStack)`
+- Client GUI open handler: `HelpHelperClient` → `HelpHelperScreen` (search filter, scrolling, clickable rows issuing `sendUnattendedCommand`)
 
 ## Logging conventions
 
-- Startup + debug log patterns: `src/main/java/com/fpsmod/FpsMod.java`
-- HUD toggle log (`🔁`): `src/client/java/com/fpsmod/client/FpsHudOverlay.java`
-- Rule: keep emoji prefixes for high-visibility console scanning.
+- Startup heartbeat: `src/main/java/com/otterdays/helphelper/HelpHelper.java`
+- Keep INFO-level lines short; avoid spam on hot paths (`HelpHelperScreen` render/tick-like paths stay quiet).
 
 ## Commands you will use most
 
@@ -58,17 +54,17 @@ Use this as the first stop for quick discovery.
 
 ## Output paths
 
-- Main mod jar: `BUILT/libs/fps-mod-1.0.0.jar`
-- Sources jar: `BUILT/libs/fps-mod-1.0.0-sources.jar`
+- Main mod jar: `BUILT/libs/help-helper-1.0.0.jar`
+- Sources jar: `BUILT/libs/help-helper-1.0.0-sources.jar`
 - Test report: `BUILT/reports/tests/test/index.html`
 - Gradle problems report: `BUILT/reports/problems/problems-report.html`
 
 ## Safe-edit hotspots
 
-- UI/HUD-only changes: `src/client/java/com/fpsmod/client/`
+- UI-only changes: `src/client/java/com/otterdays/helphelper/client/`
+- Networking + `/help`: `HelpHelperCommands`, `HelpCommandsSupport`, `OpenHelpPayload`
 - Cross-cutting metadata changes: `fabric.mod.json` + `gradle.properties` + `README.md`
-- Version upgrades: keep `gradle.properties`, `gradle/wrapper/gradle-wrapper.properties` (when bumping Gradle), and this README’s compatibility table aligned.
 
 ## Git / upstream
 
-- Default remote is set when you clone; this template was pushed to `https://github.com/Otterdays/Minecraft-Fabric-Sample-Mod` (if you fork or rename the repo, update all `contact` fields in `fabric.mod.json`: `homepage`, `sources`, and `issues`).
+- Product repository: [`https://github.com/Otterdays/MC-Helpy-Helper`](https://github.com/Otterdays/MC-Helpy-Helper). Update Git remotes and `fabric.mod.json` → `contact` when publishing.

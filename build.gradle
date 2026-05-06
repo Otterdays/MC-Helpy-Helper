@@ -15,7 +15,7 @@ loom {
     splitEnvironmentSourceSets()
 
     mods {
-        "fpsmod" {
+        "helphelper" {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
         }
@@ -64,3 +64,4 @@ publishing {
 test {
     useJUnitPlatform()
 }
+
