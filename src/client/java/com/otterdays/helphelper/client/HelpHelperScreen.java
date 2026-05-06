@@ -25,34 +25,15 @@ import net.minecraft.util.ARGB;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.otterdays.helphelper.network.OpenHelpPayload.CommandEntry;
+import net.minecraft.util.ARGB;
 
 /** Nearly full-window help browser with search, filtering, and flexible command actions. */
 public final class HelpHelperScreen extends Screen {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final HelpHelperConfig CFG = HelpHelperConfig.get();
     private static final List<String> CATEGORY_ORDER = List.of("Server/Modded", "Chat", "Social", "World",
         "Worldgen", "Player", "Movement", "Build", "Inventory", "Storage", "Entities", "Utility", "Debug",
         "Admin", "Server", "Visual", "Transport", "Advanced");
-    private static final int SCROLLBAR_WIDTH = 8;
-    private static final int SCROLLBAR_GAP = 2;
-
-    // GLFW key codes avoid magic numbers in keyPressed.
-    private static final int KEY_DOWN = 264;
-    private static final int KEY_UP = 265;
-    private static final int KEY_PAGE_UP = 266;
-    private static final int KEY_PAGE_DOWN = 267;
-    private static final int KEY_HOME = 268;
-    private static final int KEY_END = 269;
-    private static final int KEY_ENTER = 257;
-    private static final int KEY_KP_ENTER = 335;
-    private static final int KEY_C = 67;
-    private static final int KEY_D = 68;
-    private static final int KEY_F = 70;
-    private static final int DETAIL_WIDTH = 190;
-    private static final int DETAIL_GAP = 10;
-    private static final int BADGE_WIDTH = 22;
-    private static final int MIN_CATEGORY_WIDTH = 46;
-    private static final int MAX_CATEGORY_WIDTH = 92;
-    private static final double PAGE_SCROLL_FACTOR = 0.88;
 
     private final List<CommandCatalog.CommandRow> allCommands;
     private final List<String> categories;
@@ -696,6 +677,7 @@ public final class HelpHelperScreen extends Screen {
     }
 
     private void markRecent(String command) {
+        // Remove any existing occurrence so we don't end up with duplicates during the add.
         recentCommands.remove(command);
         recentCommands.add(0, command);
         while (recentCommands.size() > 12) {

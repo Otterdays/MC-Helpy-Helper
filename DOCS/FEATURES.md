@@ -1,6 +1,13 @@
+<!-- PRESERVATION RULE: Never delete or replace content. Append or annotate only. -->
 <!-- PRESERVATION RULE: Keep documentation current. Replace stale details when needed. -->
 
 # Help Helper - Feature Documentation
+
+[AMENDED 2026-05-06]:
+- Added UI roadmap document: `DOCS/ROADMAP.md`.
+- Roadmap includes 3 phases with 14 checklist items focused on edge cases, UX safety, and QoL.
+- Phase 1 targets accidental execution prevention, hover/selection separation, empty-state recovery, action feedback, and category overflow handling.
+- This amendment is append-only and does not remove prior feature documentation.
 
 Fabric mod (`helphelper`): searchable command browser GUI plus clickable command execution, minimal server load.
 
