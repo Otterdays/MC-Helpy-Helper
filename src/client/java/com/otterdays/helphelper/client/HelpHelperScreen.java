@@ -112,15 +112,26 @@ public final class HelpHelperScreen extends Screen {
         computeListLayout();
 
         int controlH = Math.max(CFG.controlHeight, minecraft.font.lineHeight + 10);
-        int topControls = margin() + minecraft.font.lineHeight + 42;
+        int headerBlockHeight = (minecraft.font.lineHeight * 2) + 34;
+        int topControls = margin() + headerBlockHeight;
         int gap = CFG.buttonGap;
         int closeW = CFG.closeButtonWidth;
         int densityW = CFG.densityButtonWidth;
         int actionW = Math.min(CFG.actionButtonWidth, Math.max(72, (listRight - listLeft) / 5));
+        int controlAreaW = Math.max(120, listRight - listLeft);
+        int minSearchW = Math.min(CFG.searchMinWidth, Math.max(64, controlAreaW / 3));
+        int targetRightW = Math.max(120, controlAreaW - minSearchW - gap);
+        int rightTotalW = actionW + densityW + closeW + (gap * 2);
+        if (rightTotalW > targetRightW) {
+            double scale = targetRightW / (double) rightTotalW;
+            actionW = Math.max(56, (int) Math.floor(actionW * scale));
+            densityW = Math.max(56, (int) Math.floor(densityW * scale));
+            closeW = Math.max(50, (int) Math.floor(closeW * scale));
+        }
         int closeLeft = listRight - closeW;
         int densityLeft = closeLeft - gap - densityW;
         int actionLeft = densityLeft - gap - actionW;
-        int searchW = Math.max(CFG.searchMinWidth, actionLeft - listLeft - gap);
+        int searchW = Math.max(64, actionLeft - listLeft - gap);
 
         searchBox = new EditBox(minecraft.font, listLeft, topControls, searchW, controlH, Component.literal("Search"));
         searchBox.setResponder(this::applyFilter);
@@ -143,11 +154,11 @@ public final class HelpHelperScreen extends Screen {
             .bounds(closeLeft, topControls, closeW, controlH)
             .build());
 
-        int quickY = topControls + controlH + 8;
+        int quickY = topControls + controlH + 6;
         addQuickFilterButtons(quickY, controlH);
-        int modeY = quickY + controlH + 4;
+        int modeY = quickY + controlH + 3;
         addModeButtons(modeY, controlH);
-        addCategoryButtons(modeY + controlH + 4, controlH);
+        addCategoryButtons(modeY + controlH + 3, controlH);
         applyFilter(searchBox.getValue());
     }
 
@@ -162,16 +173,16 @@ public final class HelpHelperScreen extends Screen {
     private void computeListLayout() {
         int m = margin();
         int controlH = Math.max(CFG.controlHeight, minecraft.font.lineHeight + 10);
+        int headerBlockHeight = (minecraft.font.lineHeight * 2) + 34;
         listLeft = m;
         int available = Math.max(40, width - (m * 2));
         int details = available >= 460 ? Math.min(CFG.detailPanelWidth, available / 3) : 0;
         listRight = Math.max(listLeft + 40, width - m - details - (details > 0 ? CFG.detailPanelGap : 0));
-        int estimatedTopRows = 6;
-        int topSpace = estimatedTopRows * controlH + (minecraft.font.lineHeight * 2) + 46;
-        int minTopSpace = height < 250 ? 150 : 196;
-        topSpace = Math.max(minTopSpace, topSpace);
-        topSpace = Math.min(topSpace, Math.max(120, height - m - 84));
-        listTop = m + minecraft.font.lineHeight + topSpace;
+        int controlRowsReserve = 5;
+        int topSpace = headerBlockHeight + (controlRowsReserve * controlH) + 20;
+        int maxTopSpace = Math.max(140, height - m - 84);
+        topSpace = Math.min(topSpace, maxTopSpace);
+        listTop = m + topSpace;
         listBottom = Math.max(listTop + 60, height - m);
 
         clampScrollForViewport();
@@ -339,19 +350,19 @@ public final class HelpHelperScreen extends Screen {
         int m = margin();
 
         gfx.fill(m, m, width - m, height - m, ARGB.color(228, 12, 15, 22));
-        gfx.fillGradient(m + 14, m + 8, width - m - 14, Math.min(height, m + 43), ARGB.color(255, 72, 64, 42),
+        gfx.fillGradient(m + 14, m + 8, width - m - 14, Math.min(height, m + 38), ARGB.color(255, 72, 64, 42),
             ARGB.color(255, 28, 32, 50));
-        gfx.fillGradient(m + 14, Math.min(height, m + 43), width - m - 14, Math.min(height, m + 54),
+        gfx.fillGradient(m + 14, Math.min(height, m + 38), width - m - 14, Math.min(height, m + 46),
             ARGB.color(120, 255, 226, 120), ARGB.color(0, 255, 226, 120));
 
         gfx.centeredText(minecraft.font, Component.literal("Help Helper").withStyle(ChatFormatting.GOLD), width / 2,
-            m + 10, ARGB.color(255, 255, 226, 120));
+            m + 8, ARGB.color(255, 255, 226, 120));
 
         String counter = ChatFormatting.YELLOW.toString() + visible.size() + ChatFormatting.GRAY + " / "
             + allCommands.size() + ChatFormatting.WHITE + " commands";
-        gfx.text(minecraft.font, counter, listLeft, m + minecraft.font.lineHeight + 26, ARGB.color(255, 200, 200, 200));
+        gfx.text(minecraft.font, counter, listLeft, m + minecraft.font.lineHeight + 20, ARGB.color(255, 200, 200, 200));
         String filterLine = ellipsize(activeFilterText(), Math.max(60, listRight - listLeft));
-        gfx.text(minecraft.font, filterLine, listLeft, m + minecraft.font.lineHeight + 38,
+        gfx.text(minecraft.font, filterLine, listLeft, m + minecraft.font.lineHeight + 30,
             ARGB.color(255, 145, 188, 206));
         String actionHint = (clickAction == ClickAction.RUN && selectedIndex >= 0 && selectedIndex < visible.size()
             && visible.get(selectedIndex).info().risky())

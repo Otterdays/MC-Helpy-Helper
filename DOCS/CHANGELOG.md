@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - Updated `HelpHelperScreen` top control layout to use font-aware control height and adaptive top spacing, fixing clipped/cut-off controls on larger UI scales.
+- Hardened `HelpHelperScreen` for edge cases by scaling top-row control widths on narrow layouts and reserving more vertical space for top controls/filters.
 
 ### Added
 

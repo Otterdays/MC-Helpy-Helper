@@ -2,6 +2,29 @@
 
 # SCRATCHPAD
 
+## 2026-05-06 [AMENDED-2]
+
+### Active Tasks
+
+- Edge-case hardening for `HelpHelperScreen` top panel and control-row layout at narrow widths/high UI scale.
+
+### Blockers
+
+- No blocker; awaiting in-game visual confirmation for the latest layout reserve changes.
+
+### Last 5 Actions
+
+1. Fixed compile breaks introduced by malformed `CFG.*` constant declarations.
+2. Repaired `keyPressed` switch labels to use compile-time `KEY_*` constants.
+3. Increased top reserve rows to reduce clipping of control/filter rows.
+4. Added width-scaling for right-side control buttons to prevent overflow on narrow screens.
+5. Rebuilt successfully with `build.bat`.
+
+### Next Steps
+
+- Validate with the exact problematic UI scale/resolution.
+- If clipping remains, enforce a fixed-height top control panel fallback.
+
 ## 2026-05-06 [AMENDED]
 
 ### Active Tasks
