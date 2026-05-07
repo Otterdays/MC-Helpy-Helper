@@ -26,15 +26,21 @@ Upstream home for packaging and releases: [Otterdays/MC-Helpy-Helper](https://gi
 
 ## Features
 
-- **Searchable GUI** - Full-window command browser with real-time search
-- **Command Details** - Selected command shows category, aliases, risk label, and templates
-- **Click Actions** - Run commands, copy to clipboard, or fill chat box
-- **Categories** - Filter by command family and vanilla command groups
-- **Display Modes** - Toggle compact or roomy row spacing
-- **Keyboard Navigation** - Arrow keys, Page Up/Down, Home/End
+- **Searchable GUI** - Full-window command browser with real-time search and relevance scoring
+- **Command Details** - Selected command shows category, aliases, risk label, templates, and description
+- **Click Actions** - Run commands, copy to clipboard, or fill chat box (default, copy, edit modes)
+- **Categories** - Filter by command family and vanilla command groups with colored accent bars
+- **Display Modes** - Toggle compact or roomy row spacing; persistent across sessions
+- **Keyboard Navigation** - Arrow keys, Page Up/Down, Home/End, plus dedicated keys for mode/density/favorite
 - **Scrollbar** - Mouse wheel, drag scrollbar, or click track for page scrolling
-- **Vanilla Catalog** - Known Minecraft commands get descriptions, aliases, and templates
-- **Permission-Aware** - Only shows commands the player can use
+- **Vanilla Catalog** - Known Minecraft commands get descriptions, aliases, templates, and risk labeling
+- **Permission-Aware** - Only shows commands the player can use based on Brigadier permission checks
+- **Favorites** - Star commands with `F` key; boosted in sort order and filterable by "Fav" quick filter
+- **Recent Commands** - Last 12 executed commands tracked and ranked higher in default sort
+- **Quick Filters** - Filter by All, Favorites, Recent, Vanilla, Modded, Safe, or Risky commands
+- **Sort Modes** - Sort by Relevance (Top), A-Z, Recent execution, or Vanilla-first priority
+- **UI State Persistence** - Favorites, recents, active filters, sort mode, and display settings saved locally
+- **Refined Visual Design** - Zebra-striped rows, category color bars, subtle separators, outlined badges, and scaled-aware header
 
 ## Behavior
 
@@ -91,16 +97,26 @@ src/
 - **Codebase map**: [`LOCATIONS.md`](LOCATIONS.md)
 - **Build configuration**: [`build.gradle`](build.gradle), [`gradle.properties`](gradle.properties)
 
-## Known Issues & Improvements
+## Recent Improvements
 
-See [`DOCS/FEATURES.md`](DOCS/FEATURES.md) for planned enhancements:
+- ✅ **Font-aware layout** - Header height and text spacing scale properly at any GUI scale (fixes clipping on large fonts)
+- ✅ **Favorites system** - Star commands with `F` key; stored in `config/helphelper/ui.json`
+- ✅ **Recent history** - Last 12 executed commands tracked and ranked by recency
+- ✅ **Quick filters** - Filter by All, Favorites, Recent, Vanilla, Modded, Safe, or Risky
+- ✅ **Sort modes** - Top (relevance-based), A-Z, Recent, Vanilla-first
+- ✅ **Visual polish** - Zebra-striped rows, row separators, category color bars, corner accents, outlined badges, panel gradients
 
-- Expand vanilla metadata coverage
+## Planned Enhancements
+
+See [`DOCS/FEATURES.md`](DOCS/FEATURES.md) for additional planned improvements:
+
+- Expand vanilla command metadata coverage
 - Group commands by mod/namespace
-- Add favorite/bookmark functionality
-- Implement fuzzy search
-- Show required permission levels
-- Add config file for user preferences
+- Fuzzy search with advanced scoring algorithms
+- Show required permission level per command
+- Keyboard shortcut to open help GUI without typing `/help`
+- Config file GUI for theme customization
+- Command history with timestamps
 
 ## License
 

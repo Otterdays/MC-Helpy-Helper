@@ -24,6 +24,11 @@ Fabric mod (`helphelper`): searchable command browser GUI plus clickable command
 | **Details panel** | Shows selected command title, command line, category, vanilla/risky label, aliases, and templates |
 | **Navigation** | Mouse wheel scroll, scrollbar drag, track paging, arrow keys, Page Up/Down, Home/End |
 | **Display modes** | Compact/Roomy row density toggle |
+| **Favorites** | Star favorite commands (F key); shows in All scope but boosted in ranking |
+| **Recent commands** | Last 12 executed commands tracked; higher in sort order |
+| **Quick filters** | Filter by All, Favorites, Recent, Vanilla-only, Modded-only, Safe (non-risky), or Risky commands |
+| **Sort modes** | Sort by Top (relevance + recency + favorites), A-Z (alphabetical), Recent (execution order), Vanilla-first |
+| **UI persistence** | Favorites, recents, active filter, sort mode, search text, and display density saved to `config/helphelper/ui.json` |
 | **Networking** | Server-to-client payload via Fabric networking |
 
 ---
@@ -38,9 +43,10 @@ Fabric mod (`helphelper`): searchable command browser GUI plus clickable command
    - `Arrow Up/Down` - Navigate selection
    - `Page Up/Down` - Scroll by page
    - `Home/End` - Jump to top/bottom
-   - `Enter` - Execute selected command
-   - `C` - Cycle click action mode
-   - `D` - Toggle compact/roomy display
+   - `Enter` (or NumpadEnter) - Execute selected command
+   - `C` - Cycle click action mode (Run → Copy → Fill Chat)
+   - `D` - Toggle compact/roomy display density
+   - `F` - Toggle favorite status of selected command
 
 ---
 

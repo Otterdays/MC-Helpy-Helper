@@ -348,22 +348,27 @@ public final class HelpHelperScreen extends Screen {
 
     private void drawBackdrop(GuiGraphicsExtractor gfx) {
         int m = margin();
+        int fh = minecraft.font.lineHeight;
+        // Header band height scales with font so it never clips the title or counter lines
+        int headerH = Math.max(38, fh * 3 + 8);
 
         gfx.fill(m, m, width - m, height - m, ARGB.color(228, 12, 15, 22));
-        gfx.fillGradient(m + 14, m + 8, width - m - 14, Math.min(height, m + 38), ARGB.color(255, 72, 64, 42),
-            ARGB.color(255, 28, 32, 50));
-        gfx.fillGradient(m + 14, Math.min(height, m + 38), width - m - 14, Math.min(height, m + 46),
+        gfx.fillGradient(m + 14, m + 6, width - m - 14, m + headerH,
+            ARGB.color(255, 72, 64, 42), ARGB.color(255, 28, 32, 50));
+        gfx.fillGradient(m + 14, m + headerH, width - m - 14, m + headerH + 10,
             ARGB.color(120, 255, 226, 120), ARGB.color(0, 255, 226, 120));
 
-        gfx.centeredText(minecraft.font, Component.literal("Help Helper").withStyle(ChatFormatting.GOLD), width / 2,
-            m + 8, ARGB.color(255, 255, 226, 120));
+        gfx.centeredText(minecraft.font, Component.literal("Help Helper").withStyle(ChatFormatting.GOLD),
+            width / 2, m + 8, ARGB.color(255, 255, 226, 120));
 
+        // Counter and filter line separated by exactly one line-height so they never overlap
         String counter = ChatFormatting.YELLOW.toString() + visible.size() + ChatFormatting.GRAY + " / "
             + allCommands.size() + ChatFormatting.WHITE + " commands";
-        gfx.text(minecraft.font, counter, listLeft, m + minecraft.font.lineHeight + 20, ARGB.color(255, 200, 200, 200));
+        gfx.text(minecraft.font, counter, listLeft, m + fh + 16, ARGB.color(255, 200, 200, 200));
         String filterLine = ellipsize(activeFilterText(), Math.max(60, listRight - listLeft));
-        gfx.text(minecraft.font, filterLine, listLeft, m + minecraft.font.lineHeight + 30,
-            ARGB.color(255, 145, 188, 206));
+        gfx.text(minecraft.font, filterLine, listLeft, m + fh * 2 + 20, ARGB.color(255, 145, 188, 206));
+
+        // Action hint above the list — anchored to listTop rather than a fixed pixel offset
         String actionHint = (clickAction == ClickAction.RUN && selectedIndex >= 0 && selectedIndex < visible.size()
             && visible.get(selectedIndex).info().risky())
                 ? clickAction.helpText() + ChatFormatting.YELLOW + "  (risky - will open chat for review)"
@@ -372,13 +377,26 @@ public final class HelpHelperScreen extends Screen {
         int shortcutsW = minecraft.font.width(shortcuts);
         int hintMax = Math.max(40, listRight - listLeft - shortcutsW - 10);
         gfx.text(minecraft.font, Component.literal(ellipsize(actionHint, hintMax)).withStyle(ChatFormatting.GRAY),
-            listLeft, listTop - 18, ARGB.color(255, 180, 186, 204));
+            listLeft, listTop - fh - 4, ARGB.color(255, 180, 186, 204));
         if (shortcutsW < listRight - listLeft - 24) {
-            gfx.text(minecraft.font, shortcuts, Math.max(listLeft, listRight - shortcutsW), listTop - 18,
+            gfx.text(minecraft.font, shortcuts, Math.max(listLeft, listRight - shortcutsW), listTop - fh - 4,
                 ARGB.color(255, 130, 136, 150));
         }
 
-        outlineRect(gfx, listLeft - 4, listTop - 4, listRight + 4, listBottom + 4, ARGB.color(200, 90, 100, 150));
+        // List box: subtle background fill, border, and L-shaped gold corner accents
+        int bx0 = listLeft - 4, by0 = listTop - 4, bx1 = listRight + 4, by1 = listBottom + 4;
+        gfx.fill(bx0, by0, bx1, by1, ARGB.color(52, 20, 28, 48));
+        outlineRect(gfx, bx0, by0, bx1, by1, ARGB.color(200, 90, 100, 150));
+        int ca = 6;
+        int cc = ARGB.color(210, 255, 214, 88);
+        gfx.fill(bx0,      by0,      bx0 + ca, by0 + 1,  cc);
+        gfx.fill(bx0,      by0,      bx0 + 1,  by0 + ca, cc);
+        gfx.fill(bx1 - ca, by0,      bx1,      by0 + 1,  cc);
+        gfx.fill(bx1 - 1,  by0,      bx1,      by0 + ca, cc);
+        gfx.fill(bx0,      by1 - 1,  bx0 + ca, by1,      cc);
+        gfx.fill(bx0,      by1 - ca, bx0 + 1,  by1,      cc);
+        gfx.fill(bx1 - ca, by1 - 1,  bx1,      by1,      cc);
+        gfx.fill(bx1 - 1,  by1 - ca, bx1,      by1,      cc);
     }
 
     private void drawCommandRows(GuiGraphicsExtractor gfx, int mouseX, int mouseY) {
@@ -404,20 +422,36 @@ public final class HelpHelperScreen extends Screen {
                 boolean hovered =
                     mouseX >= listLeft && mouseX < contentRight() && mouseY >= yi && mouseY < yi + lineHeight - 1;
                 CommandCatalog.CommandRow row = visible.get(i);
-                int rowBg = selected ? ARGB.color(164, 70, 94, 156)
-                    : (hovered ? ARGB.color(126, 52, 70, 108) : ARGB.color(78, 24, 30, 48));
-                if (row.info().risky()) {
-                    rowBg = selected ? ARGB.color(162, 104, 66, 46)
-                        : (hovered ? ARGB.color(124, 86, 50, 36) : ARGB.color(82, 48, 34, 28));
+                // Zebra base tints — even rows darker, odd rows a hair lighter
+                boolean even = (i % 2 == 0);
+                int baseNormal = even ? ARGB.color(68, 22, 28, 44) : ARGB.color(40, 255, 255, 255);
+                int baseRisky  = even ? ARGB.color(72, 48, 32, 22) : ARGB.color(48, 255, 210, 170);
+                int rowBg;
+                if (selected) {
+                    rowBg = row.info().risky() ? ARGB.color(162, 104, 66, 46) : ARGB.color(164, 70, 94, 156);
+                } else if (hovered) {
+                    rowBg = row.info().risky() ? ARGB.color(124, 86, 50, 36) : ARGB.color(126, 52, 70, 108);
+                } else {
+                    rowBg = row.info().risky() ? baseRisky : baseNormal;
                 }
-                gfx.fill(listLeft + 2, yi, contentRight(), yi + lineHeight - 3, rowBg);
-                gfx.fill(listLeft + 2, yi, listLeft + 5, yi + lineHeight - 3, categoryColor(row.category()));
+                gfx.fill(listLeft, yi, contentRight(), yi + lineHeight - 1, rowBg);
+
+                // Subtle separator line at top of every row except the first
+                if (i > 0) {
+                    gfx.fill(listLeft + 6, yi, contentRight() - 4, yi + 1, ARGB.color(24, 190, 205, 240));
+                }
+
+                // Category color bar; selected rows also get a thin gold accent next to it
+                gfx.fill(listLeft, yi, listLeft + 3, yi + lineHeight - 1, categoryColor(row.category()));
+                if (selected) {
+                    gfx.fill(listLeft + 3, yi, listLeft + 5, yi + lineHeight - 1, ARGB.color(160, 255, 212, 88));
+                }
 
                 int badgeRight = contentRight() - 4;
                 int textRight = badgeRight - CFG.badgeWidth - 4;
                 int textX = listLeft + (favoriteCommands.contains(row.command()) ? 16 : 10);
                 String text = ellipsize(row.command(), textRight - textX);
-                int ty = yi + Math.max(0, (lineHeight - minecraft.font.lineHeight - 4) / 2);
+                int ty = yi + Math.max(1, (lineHeight - minecraft.font.lineHeight) / 2);
 
                 int textColor = row.info().risky() ? ARGB.color(255, 255, 204, 164)
                     : (row.info().vanilla() ? ARGB.color(255, 164, 238, 226) : ARGB.color(255, 214, 198, 255));
@@ -436,11 +470,14 @@ public final class HelpHelperScreen extends Screen {
 
     private void drawRowBadge(GuiGraphicsExtractor gfx, CommandCatalog.CommandRow row, int x0, int y0, int x1, int y1) {
         String label = row.info().risky() ? "!" : (row.info().vanilla() ? "V" : "M");
-        int bg = row.info().risky() ? ARGB.color(156, 126, 60, 34)
-            : (row.info().vanilla() ? ARGB.color(132, 34, 86, 82) : ARGB.color(132, 72, 58, 118));
-        int fg = row.info().risky() ? ARGB.color(255, 255, 194, 130)
+        int bg  = row.info().risky() ? ARGB.color(140, 120, 56, 28)
+            : (row.info().vanilla() ? ARGB.color(115, 28, 82, 78) : ARGB.color(115, 66, 52, 112));
+        int bdr = row.info().risky() ? ARGB.color(190, 205, 108, 48)
+            : (row.info().vanilla() ? ARGB.color(160, 48, 158, 148) : ARGB.color(160, 140, 108, 210));
+        int fg  = row.info().risky() ? ARGB.color(255, 255, 194, 130)
             : (row.info().vanilla() ? ARGB.color(255, 166, 244, 226) : ARGB.color(255, 220, 206, 255));
         gfx.fill(x0, y0, x1, y1, bg);
+        outlineRect(gfx, x0, y0, x1, y1, bdr);
         gfx.centeredText(minecraft.font, label, (x0 + x1) / 2, y0 + Math.max(1, (y1 - y0 - minecraft.font.lineHeight) / 2),
             fg);
     }
@@ -466,19 +503,26 @@ public final class HelpHelperScreen extends Screen {
         int panelBottom = listBottom;
         gfx.fill(panelLeft, panelTop, panelRight, panelBottom, CFG.parseColor(CFG.colorPanelBackground));
         outlineRect(gfx, panelLeft, panelTop, panelRight, panelBottom, CFG.parseColor(CFG.colorScrollbar));
+        // Subtle gold accent gradient along the top edge of the panel
+        gfx.fillGradient(panelLeft + 1, panelTop + 1, panelRight - 1, panelTop + 3,
+            ARGB.color(130, 255, 212, 88), ARGB.color(0, 255, 212, 88));
 
         CommandCatalog.CommandRow row = visible.get(selectedIndex >= 0 ? selectedIndex : 0);
         CommandCatalog.CommandInfo info = row.info();
         int x = panelLeft + 8;
-        int y = panelTop + 8;
+        int y = panelTop + 9;
         int maxW = panelRight - x - 8;
         int footerTop = Math.max(y + 72, panelBottom - 72);
 
+        // Category color bar on left edge of panel
         gfx.fill(panelLeft, panelTop, panelLeft + 3, panelBottom, categoryColor(info.category()));
         gfx.text(minecraft.font, ellipsize(info.title(), maxW), x, y, CFG.parseColor(CFG.colorFavoriteStar), true);
+        y += minecraft.font.lineHeight + 6;
+        gfx.text(minecraft.font, ellipsize(row.command(), maxW), x, y, CFG.parseColor(CFG.colorRiskyText), false);
         y += minecraft.font.lineHeight + 8;
-        gfx.text(minecraft.font, ellipsize(row.command(), maxW), x, y, CFG.parseColor(CFG.colorRiskyText), true);
-        y += minecraft.font.lineHeight + 7;
+        // Separator line after the title/command header block
+        gfx.fill(panelLeft + 4, y, panelRight - 4, y + 1, ARGB.color(80, 115, 138, 198));
+        y += 7;
         gfx.text(minecraft.font, info.category(), x, y, categoryColor(info.category()));
         y += minecraft.font.lineHeight + 6;
         String source = info.risky() ? "Risky command" : (info.vanilla() ? "Vanilla command" : "Server/mod command");
@@ -508,18 +552,23 @@ public final class HelpHelperScreen extends Screen {
 
         if (!info.presets().isEmpty()) {
             y = Math.max(y + 4, footerTop);
-            gfx.text(minecraft.font, "Templates", x, y, ARGB.color(255, 255, 226, 120));
+            // Section separator + left accent bar before "Templates" label
+            gfx.fill(panelLeft + 4, y - 3, panelRight - 4, y - 2, ARGB.color(80, 115, 138, 198));
+            gfx.fill(x, y, x + 2, y + minecraft.font.lineHeight + 2, ARGB.color(200, 255, 212, 88));
+            gfx.text(minecraft.font, "  Templates", x, y, ARGB.color(255, 255, 226, 120));
             y += minecraft.font.lineHeight + 5;
             List<PresetHit> hits = new ArrayList<>();
             for (String preset : info.presets()) {
                 if (y + 18 > panelBottom - 6) {
                     break;
                 }
-                boolean hovered = mouseX >= x && mouseX < panelRight - 8 && mouseY >= y && mouseY < y + 17;
-                gfx.fill(x, y, panelRight - 8, y + 17,
-                    hovered ? ARGB.color(142, 86, 96, 120) : ARGB.color(86, 42, 46, 64));
-                gfx.text(minecraft.font, ellipsize(preset, maxW - 8), x + 4, y + 4, ARGB.color(255, 210, 245, 255));
-                hits.add(new PresetHit(preset, x, y, panelRight - 8, y + 17));
+                int px0 = x, py0 = y, px1 = panelRight - 8, py1 = y + 17;
+                boolean hovered = mouseX >= px0 && mouseX < px1 && mouseY >= py0 && mouseY < py1;
+                gfx.fill(px0, py0, px1, py1, hovered ? ARGB.color(148, 82, 92, 124) : ARGB.color(82, 38, 42, 60));
+                outlineRect(gfx, px0, py0, px1, py1,
+                    hovered ? ARGB.color(185, 90, 102, 158) : ARGB.color(95, 62, 74, 116));
+                gfx.text(minecraft.font, ellipsize(preset, maxW - 12), px0 + 5, py0 + 4, ARGB.color(255, 210, 245, 255));
+                hits.add(new PresetHit(preset, px0, py0, px1, py1));
                 y += 20;
             }
             presetHits = hits;
@@ -534,9 +583,9 @@ public final class HelpHelperScreen extends Screen {
         int thumbH = scrollbarThumbHeight();
         int thumbTop = scrollbarThumbTop();
         int thumbBottom = Math.min(listBottom, thumbTop + thumbH);
-        gfx.fill(trackLeft, listTop, listRight, listBottom, ARGB.color(92, 8, 10, 18));
-        int thumbColor = draggingScrollbar ? ARGB.color(220, 160, 180, 240) : ARGB.color(190, 130, 150, 210);
-        gfx.fill(trackLeft, thumbTop, listRight, thumbBottom, thumbColor);
+        gfx.fill(trackLeft + 1, listTop + 1, listRight - 1, listBottom - 1, ARGB.color(75, 6, 8, 14));
+        int thumbColor = draggingScrollbar ? ARGB.color(225, 158, 182, 244) : ARGB.color(192, 128, 148, 212);
+        gfx.fill(trackLeft + 1, thumbTop, listRight - 1, thumbBottom, thumbColor);
     }
 
     private String ellipsize(String cmd, int maxPx) {
