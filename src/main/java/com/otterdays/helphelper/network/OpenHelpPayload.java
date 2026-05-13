@@ -19,6 +19,10 @@ public record OpenHelpPayload(List<CommandEntry> commands) implements CustomPack
         CommandEntry::command,
         ByteBufCodecs.STRING_UTF8,
         CommandEntry::root,
+        ByteBufCodecs.STRING_UTF8,
+        CommandEntry::syntax,
+        ByteBufCodecs.STRING_UTF8,
+        CommandEntry::originHint,
         CommandEntry::new);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenHelpPayload> CODEC = StreamCodec.composite(
@@ -31,6 +35,9 @@ public record OpenHelpPayload(List<CommandEntry> commands) implements CustomPack
         return TYPE;
     }
 
-    public record CommandEntry(String command, String root) {
+    public record CommandEntry(String command, String root, String syntax, String originHint) {
+        public CommandEntry(String command, String root) {
+            this(command, root, command, "Brigadier root /" + root);
+        }
     }
 }

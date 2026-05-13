@@ -101,7 +101,7 @@ Unknown commands still render with a generic "Server/Modded" entry.
 
 ## Configuration
 
-Currently no config file. Future considerations:
+Configuration is split between runtime layout/theme config (`config/helphelper/config.json`) and UI state (`config/helphelper/ui.json`). Future considerations:
 
 - Default click action preference
 - Default display density
@@ -147,8 +147,25 @@ Currently no config file. Future considerations:
 
 ## Explicit Non-features (Current Scope)
 
-- No command execution confirmation dialogs.
+- No modal command execution confirmation dialogs; risky commands fill chat for review instead of running directly.
 - No server-side GUI rendering.
 - No datapack integration.
 - No permission management beyond Brigadier checks.
-- No external config yet.
+- External config exists for layout, theme, shortcuts, and limits; a full in-game config UI is not implemented yet.
+
+[AMENDED 2026-05-13]:
+- Row activation is now safer: single-click selects; double-click or Enter performs the selected action.
+- Hover highlighting is visual only and no longer changes the selected command.
+- Copy and favorite changes provide short in-screen feedback.
+- Configured shortcut and history/favorite limits are honored by the GUI.
+- Server command entries now carry the top-level command root so vanilla metadata is matched more reliably.
+
+
+[AMENDED 2026-05-13 - Power UX Pass]:
+- Server payload entries now include syntax previews and origin hints.
+- Details panel surfaces syntax and origin metadata when available.
+- Search uses optional fuzzy matching across command, syntax, aliases, descriptions, and origin hints.
+- Risky commands can require confirmation before direct execution.
+- `/` opens a shortcut overlay and `O` opens the in-game config screen.
+- Layout math is covered by viewport-matrix regression tests.
+- Mod Menu wiring is deferred until a compatible API artifact exists for the active Minecraft mappings.

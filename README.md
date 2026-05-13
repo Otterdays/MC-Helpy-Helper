@@ -26,29 +26,29 @@ Upstream home for packaging and releases: [Otterdays/MC-Helpy-Helper](https://gi
 
 ## Features
 
-- **Searchable GUI** - Full-window command browser with real-time search and relevance scoring
-- **Command Details** - Selected command shows category, aliases, risk label, templates, and description
-- **Click Actions** - Run commands, copy to clipboard, or fill chat box (default, copy, edit modes)
+- **Searchable GUI** - Full-window command browser with real-time fuzzy search and relevance scoring
+- **Command Details** - Selected command shows category, aliases, risk label, syntax preview, origin hint, templates, and description
+- **Click Actions** - Select commands safely, then double-click or press Enter to run, copy, or fill chat
 - **Categories** - Filter by command family and vanilla command groups with colored accent bars
 - **Display Modes** - Toggle compact or roomy row spacing; persistent across sessions
-- **Keyboard Navigation** - Arrow keys, Page Up/Down, Home/End, plus dedicated keys for mode/density/favorite
+- **Keyboard Navigation** - Arrow keys, Page Up/Down, Home/End, plus dedicated keys for mode/density/favorite/help/config
 - **Scrollbar** - Mouse wheel, drag scrollbar, or click track for page scrolling
 - **Vanilla Catalog** - Known Minecraft commands get descriptions, aliases, templates, and risk labeling
 - **Permission-Aware** - Only shows commands the player can use based on Brigadier permission checks
 - **Favorites** - Star commands with `F` key; boosted in sort order and filterable by "Fav" quick filter
-- **Recent Commands** - Last 12 executed commands tracked and ranked higher in default sort
+- **Recent Commands** - Recently used commands tracked and ranked higher in default sort; cap is configurable
 - **Quick Filters** - Filter by All, Favorites, Recent, Vanilla, Modded, Safe, or Risky commands
 - **Sort Modes** - Sort by Relevance (Top), A-Z, Recent execution, or Vanilla-first priority
-- **UI State Persistence** - Favorites, recents, active filters, sort mode, and display settings saved locally
+- **UI State Persistence** - Favorites, recents, active filters, sort mode, action feedback, and display/config settings saved locally
 - **Refined Visual Design** - Zebra-striped rows, category color bars, subtle separators, outlined badges, and scaled-aware header
 
 ## Behavior
 
 - **`/help`** (logical server command): if the issuer is a **player**, the server aggregates usable command paths for that source's permissions and sends them to that player's client in an S2C payload; the client opens `Help Helper`.
 - **Search** filters rows across command text, category, aliases, and description.
-- **Click** a row: runs the command, copies it, or fills chat depending on selected mode.
+- **Click** a row to select it; **double-click** or press **Enter** to run, copy, or fill chat depending on selected mode.
 - **Templates** on the right panel open in chat for editing.
-- **Risky commands** default to fill-chat when run mode is selected.
+- **Risky commands** show a confirmation screen in run mode; players can run, edit in chat, or cancel.
 - **Scroll** wheel over the list area scrolls the list; track click pages; thumb drag works.
 
 Non-players requesting `/help` get a chat error.
@@ -99,12 +99,12 @@ src/
 
 ## Recent Improvements
 
-- ✅ **Font-aware layout** - Header height and text spacing scale properly at any GUI scale (fixes clipping on large fonts)
-- ✅ **Favorites system** - Star commands with `F` key; stored in `config/helphelper/ui.json`
-- ✅ **Recent history** - Last 12 executed commands tracked and ranked by recency
-- ✅ **Quick filters** - Filter by All, Favorites, Recent, Vanilla, Modded, Safe, or Risky
-- ✅ **Sort modes** - Top (relevance-based), A-Z, Recent, Vanilla-first
-- ✅ **Visual polish** - Zebra-striped rows, row separators, category color bars, corner accents, outlined badges, panel gradients
+- **Font-aware layout** - Header height and text spacing scale properly at any GUI scale (fixes clipping on large fonts)
+- **Favorites system** - Star commands with `F` key; stored in `config/helphelper/ui.json`
+- **Recent history** - Last 12 executed commands tracked and ranked by recency
+- **Quick filters** - Filter by All, Favorites, Recent, Vanilla, Modded, Safe, or Risky
+- **Sort modes** - Top (relevance-based), A-Z, Recent, Vanilla-first
+- **Visual polish** - Zebra-striped rows, row separators, category color bars, corner accents, outlined badges, panel gradients
 
 ## Planned Enhancements
 
@@ -115,9 +115,14 @@ See [`DOCS/FEATURES.md`](DOCS/FEATURES.md) for additional planned improvements:
 - Fuzzy search with advanced scoring algorithms
 - Show required permission level per command
 - Keyboard shortcut to open help GUI without typing `/help`
-- Config file GUI for theme customization
+- In-game config GUI for safety/search/detail toggles and history limits
 - Command history with timestamps
 
 ## License
 
 See [LICENSE](LICENSE) (currently All Rights Reserved in template metadata; you may publish your own SPDX ID when releasing).
+
+
+### Mod Menu note
+
+The config screen is implemented in-game (O from Help Helper). A hard Mod Menu entrypoint was tested, but the currently published Mod Menu API artifacts do not compile against this Minecraft 26.1.2 mapping set yet; the screen is ready to wire once a compatible artifact exists.

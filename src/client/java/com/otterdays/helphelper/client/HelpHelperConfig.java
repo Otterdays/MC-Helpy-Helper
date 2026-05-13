@@ -58,6 +58,9 @@ public final class HelpHelperConfig {
     // ── Limits ─────────────────────────────────────────────────────────────────
     public int maxRecentCommands = 12;
     public int maxFavorites = 100;
+    public boolean confirmRiskyCommands = true;
+    public boolean enableFuzzySearch = true;
+    public boolean showSyntaxPreview = true;
 
     // ── Keyboard shortcuts ─────────────────────────────────────────────────────
     public int keyDown = 264;
@@ -71,6 +74,8 @@ public final class HelpHelperConfig {
     public int keyCycleAction = 67;      // C
     public int keyToggleCompact = 68;     // D
     public int keyToggleFavorite = 70;    // F
+    public int keyHelpOverlay = 47;       // /
+    public int keyConfigScreen = 79;      // O
 
     // ── Category color map (JSON-friendly: category -> color) ──────────────────
     public String[] categoryColors = {
@@ -170,6 +175,16 @@ public final class HelpHelperConfig {
         return parseColor("0xFF969aa2"); // fallback gray
     }
 
+    public synchronized void save() {
+        Path path = configPath();
+        try {
+            Files.createDirectories(path.getParent());
+            Files.writeString(path, GSON.toJson(this));
+            HelpHelper.LOGGER.info("HelpHelper config saved to {}", path);
+        } catch (IOException e) {
+            HelpHelper.LOGGER.warn("Failed to save config at {}: {}", path, e.getMessage());
+        }
+    }
     /** Export current config as JSON string (for saving edits). */
     public String toJson() {
         return GSON.toJson(this);

@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
+import java.util.Locale;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,6 +25,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.ARGB;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.otterdays.helphelper.HelpHelperLayoutMath;
 import com.otterdays.helphelper.network.OpenHelpPayload.CommandEntry;
 
 /** Nearly full-window help browser with search, filtering, and flexible command actions. */
@@ -33,28 +35,6 @@ public final class HelpHelperScreen extends Screen {
     private static final List<String> CATEGORY_ORDER = List.of("Server/Modded", "Chat", "Social", "World",
         "Worldgen", "Player", "Movement", "Build", "Inventory", "Storage", "Entities", "Utility", "Debug",
         "Admin", "Server", "Visual", "Transport", "Advanced");
-    private static final int SCROLLBAR_WIDTH = 8;
-    private static final int SCROLLBAR_GAP = 2;
-    private static final int DETAIL_WIDTH = 190;
-    private static final int DETAIL_GAP = 10;
-    private static final int BADGE_WIDTH = 22;
-    private static final int MIN_CATEGORY_WIDTH = 46;
-    private static final int MAX_CATEGORY_WIDTH = 92;
-    private static final double PAGE_SCROLL_FACTOR = 0.88;
-
-    // GLFW key constants used by keyPressed switch.
-    private static final int KEY_DOWN = 264;
-    private static final int KEY_UP = 265;
-    private static final int KEY_PAGE_UP = 266;
-    private static final int KEY_PAGE_DOWN = 267;
-    private static final int KEY_HOME = 268;
-    private static final int KEY_END = 269;
-    private static final int KEY_ENTER = 257;
-    private static final int KEY_KP_ENTER = 335;
-    private static final int KEY_C = 67;
-    private static final int KEY_D = 68;
-    private static final int KEY_F = 70;
-
     private final List<CommandCatalog.CommandRow> allCommands;
     private final List<String> categories;
     private final Map<String, Integer> categoryCounts;
@@ -71,6 +51,10 @@ public final class HelpHelperScreen extends Screen {
     private boolean compactRows;
     private int selectedIndex = -1;
     private boolean draggingScrollbar;
+    private boolean showHelpOverlay;
+    private int hoveredIndex = -1;
+    private String feedbackMessage = "";
+    private long feedbackUntilMillis;
     private double scrollbarGrabOffset;
     private Path stateFile;
 
@@ -86,7 +70,8 @@ public final class HelpHelperScreen extends Screen {
         this.stateFile = defaultStateFile();
         Map<String, CommandCatalog.CommandRow> uniqueCommands = new LinkedHashMap<>();
         for (CommandEntry command : commands) {
-            CommandCatalog.CommandRow row = CommandCatalog.row(command.command(), command.root());
+            CommandCatalog.CommandRow row = CommandCatalog.row(command.command(), command.root(),
+                command.syntax(), command.originHint());
             uniqueCommands.putIfAbsent(row.command(), row);
         }
         this.allCommands = List.copyOf(uniqueCommands.values());
@@ -171,33 +156,26 @@ public final class HelpHelperScreen extends Screen {
     }
 
     private void computeListLayout() {
-        int m = margin();
-        int controlH = Math.max(CFG.controlHeight, minecraft.font.lineHeight + 10);
-        int headerBlockHeight = (minecraft.font.lineHeight * 2) + 34;
-        listLeft = m;
-        int available = Math.max(40, width - (m * 2));
-        int details = available >= 460 ? Math.min(CFG.detailPanelWidth, available / 3) : 0;
-        listRight = Math.max(listLeft + 40, width - m - details - (details > 0 ? CFG.detailPanelGap : 0));
-        int controlRowsReserve = 5;
-        int topSpace = headerBlockHeight + (controlRowsReserve * controlH) + 20;
-        int maxTopSpace = Math.max(140, height - m - 84);
-        topSpace = Math.min(topSpace, maxTopSpace);
-        listTop = m + topSpace;
-        listBottom = Math.max(listTop + 60, height - m);
-
+        HelpHelperLayoutMath.Layout layout = HelpHelperLayoutMath.plan(width, height, CFG.margin,
+            minecraft.font.lineHeight, CFG.controlHeight, CFG.detailPanelWidth, CFG.detailPanelGap);
+        listLeft = layout.listLeft();
+        listTop = layout.listTop();
+        listRight = layout.listRight();
+        listBottom = layout.listBottom();
         clampScrollForViewport();
     }
 
     private void applyFilter(String raw) {
-        String query = raw == null ? "" : raw.trim().toLowerCase(java.util.Locale.ROOT);
+        String query = raw == null ? "" : raw.trim().toLowerCase(Locale.ROOT);
         visible = allCommands.stream()
             .filter(c -> quickFilter.matches(c, favoriteCommands, recentCommands))
             .filter(c -> selectedCategory.isEmpty() || c.category().equals(selectedCategory))
-            .filter(c -> query.isEmpty() || c.matches(query))
+            .filter(c -> query.isEmpty() || c.matches(query) || (CFG.enableFuzzySearch && fuzzyScore(searchableText(c), query) >= 58))
             .sorted((a, b) -> compareRows(a, b, query))
             .toList();
         selectedIndex = visible.isEmpty() ? -1 : Math.max(0, Math.min(selectedIndex, visible.size() - 1));
         scrollPixels = 0.0;
+        hoveredIndex = -1;
         draggingScrollbar = false;
         clampScrollForViewport();
     }
@@ -344,6 +322,9 @@ public final class HelpHelperScreen extends Screen {
         super.extractRenderState(gfx, mouseX, mouseY, partialTick);
         drawCommandRows(gfx, mouseX, mouseY);
         drawDetailsPanel(gfx, mouseX, mouseY);
+        if (showHelpOverlay) {
+            drawShortcutOverlay(gfx);
+        }
     }
 
     private void drawBackdrop(GuiGraphicsExtractor gfx) {
@@ -373,7 +354,7 @@ public final class HelpHelperScreen extends Screen {
             && visible.get(selectedIndex).info().risky())
                 ? clickAction.helpText() + ChatFormatting.YELLOW + "  (risky - will open chat for review)"
                 : clickAction.helpText();
-        String shortcuts = "C mode  D density  F favorite";
+        String shortcuts = "C mode  D density  F favorite  / help  O config";
         int shortcutsW = minecraft.font.width(shortcuts);
         int hintMax = Math.max(40, listRight - listLeft - shortcutsW - 10);
         gfx.text(minecraft.font, Component.literal(ellipsize(actionHint, hintMax)).withStyle(ChatFormatting.GRAY),
@@ -383,6 +364,11 @@ public final class HelpHelperScreen extends Screen {
                 ARGB.color(255, 130, 136, 150));
         }
 
+        if (!feedbackMessage.isEmpty() && System.currentTimeMillis() < feedbackUntilMillis) {
+            String feedback = ellipsize(feedbackMessage, Math.max(40, listRight - listLeft));
+            gfx.centeredText(minecraft.font, Component.literal(feedback).withStyle(ChatFormatting.YELLOW),
+                (listLeft + listRight) / 2, listTop - (fh * 2) - 6, ARGB.color(255, 255, 226, 120));
+        }
         // List box: subtle background fill, border, and L-shaped gold corner accents
         int bx0 = listLeft - 4, by0 = listTop - 4, bx1 = listRight + 4, by1 = listBottom + 4;
         gfx.fill(bx0, by0, bx1, by1, ARGB.color(52, 20, 28, 48));
@@ -419,8 +405,7 @@ public final class HelpHelperScreen extends Screen {
                 }
                 int yi = (int) Math.round(y);
                 boolean selected = i == selectedIndex;
-                boolean hovered =
-                    mouseX >= listLeft && mouseX < contentRight() && mouseY >= yi && mouseY < yi + lineHeight - 1;
+                boolean hovered = i == hoveredIndex;
                 CommandCatalog.CommandRow row = visible.get(i);
                 // Zebra base tints — even rows darker, odd rows a hair lighter
                 boolean even = (i % 2 == 0);
@@ -575,6 +560,30 @@ public final class HelpHelperScreen extends Screen {
         }
     }
 
+    private void drawShortcutOverlay(GuiGraphicsExtractor gfx) {
+        int panelW = Math.min(330, width - margin() * 4);
+        int panelH = 150;
+        int x0 = (width - panelW) / 2;
+        int y0 = Math.max(margin() + 20, (height - panelH) / 2);
+        int x1 = x0 + panelW;
+        int y1 = y0 + panelH;
+        gfx.fill(x0, y0, x1, y1, ARGB.color(238, 10, 13, 20));
+        outlineRect(gfx, x0, y0, x1, y1, ARGB.color(220, 255, 212, 88));
+        gfx.centeredText(minecraft.font, Component.literal("Help Helper Keys").withStyle(ChatFormatting.GOLD),
+            width / 2, y0 + 10, ARGB.color(255, 255, 226, 120));
+        int y = y0 + 30;
+        List<String> lines = List.of(
+            "Click row: select   Double-click/Enter: act",
+            "C: action mode   D: row density   F: favorite",
+            "Arrows/Page/Home/End: navigate list",
+            "/: close this overlay   O: config",
+            "Risky run: confirm, edit, or cancel"
+        );
+        for (String line : lines) {
+            gfx.text(minecraft.font, line, x0 + 14, y, ARGB.color(255, 212, 220, 238));
+            y += minecraft.font.lineHeight + 7;
+        }
+    }
     private void drawScrollbar(GuiGraphicsExtractor gfx) {
         if (!hasScrollableContent()) {
             return;
@@ -678,7 +687,7 @@ public final class HelpHelperScreen extends Screen {
     }
 
     private void pageScroll(double direction) {
-        scrollBy(direction * viewportHeight() * PAGE_SCROLL_FACTOR);
+        scrollBy(direction * viewportHeight() * CFG.pageScrollFactor);
     }
 
     private void dragScrollbarTo(double mouseY) {
@@ -746,8 +755,11 @@ public final class HelpHelperScreen extends Screen {
         CommandCatalog.CommandRow row = visible.get(index);
         // Risky commands open chat for review instead of running immediately, even in RUN mode.
         // This is intentional: the detail panel labels them "Fills chat by default" so the user knows.
+        if (row.info().risky() && clickAction == ClickAction.RUN && CFG.confirmRiskyCommands) {
+            minecraft.setScreen(new RiskyCommandConfirmScreen(this, row.command()));
+            return;
+        }
         ClickAction action = row.info().risky() && clickAction == ClickAction.RUN ? ClickAction.FILL_CHAT : clickAction;
-        markRecent(row.command());
         runCommand(row.command(), action);
     }
 
@@ -755,10 +767,15 @@ public final class HelpHelperScreen extends Screen {
         // Remove any existing occurrence so we don't end up with duplicates during the add.
         recentCommands.remove(command);
         recentCommands.add(0, command);
-        while (recentCommands.size() > 12) {
+        while (recentCommands.size() > Math.max(1, CFG.maxRecentCommands)) {
             recentCommands.remove(recentCommands.size() - 1);
         }
         saveState();
+    }
+
+    private void showFeedback(String message) {
+        feedbackMessage = message;
+        feedbackUntilMillis = System.currentTimeMillis() + 1800L;
     }
 
     private void runCommand(String command, ClickAction action) {
@@ -767,14 +784,17 @@ public final class HelpHelperScreen extends Screen {
         }
         switch (action) {
             case RUN -> {
+                markRecent(command);
                 Screen.clickCommandAction(minecraft.player, command, this);
                 minecraft.setScreen(null);
             }
             case COPY -> {
                 minecraft.keyboardHandler.setClipboard(command);
+                showFeedback("Copied " + command);
                 markRecent(command);
             }
             case FILL_CHAT -> {
+                showFeedback("Opened in chat");
                 minecraft.setScreen(new ChatScreen(command, true));
                 markRecent(command);
             }
@@ -810,7 +830,10 @@ public final class HelpHelperScreen extends Screen {
         int row = rowIndexAt(event.x(), event.y());
         if (row >= 0 && row < visible.size()) {
             selectedIndex = row;
-            runCommandRow(row);
+            ensureSelectionVisible();
+            if (doubled) {
+                runCommandRow(row);
+            }
             return true;
         }
         return false;
@@ -828,9 +851,7 @@ public final class HelpHelperScreen extends Screen {
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
         int row = rowIndexAt(mouseX, mouseY);
-        if (row >= 0 && row < visible.size()) {
-            selectedIndex = row;
-        }
+        hoveredIndex = row >= 0 && row < visible.size() ? row : -1;
         super.mouseMoved(mouseX, mouseY);
     }
 
@@ -858,57 +879,62 @@ public final class HelpHelperScreen extends Screen {
         if (super.keyPressed(event)) {
             return true;
         }
-        switch (event.key()) {
-            case KEY_DOWN -> {
-                moveSelection(1);
-                return true;
-            }
-            case KEY_UP -> {
-                moveSelection(-1);
-                return true;
-            }
-            case KEY_PAGE_UP -> {
-                pageScroll(-1.0);
-                return true;
-            }
-            case KEY_PAGE_DOWN -> {
-                pageScroll(1.0);
-                return true;
-            }
-            case KEY_HOME -> {
-                scrollTo(0.0);
-                selectedIndex = visible.isEmpty() ? -1 : 0;
-                return true;
-            }
-            case KEY_END -> {
-                scrollTo(maxScroll());
-                selectedIndex = visible.isEmpty() ? -1 : visible.size() - 1;
-                return true;
-            }
-            case KEY_ENTER, KEY_KP_ENTER -> {
-                runCommandRow(selectedIndex >= 0 ? selectedIndex : 0);
-                return true;
-            }
-            case KEY_C -> {
-                clickAction = clickAction.next();
-                rebuildWidgetsKeepingSearch();
-                saveState();
-                return true;
-            }
-            case KEY_D -> {
-                compactRows = !compactRows;
-                rebuildWidgetsKeepingSearch();
-                saveState();
-                return true;
-            }
-            case KEY_F -> {
-                toggleFavorite();
-                return true;
-            }
-            default -> {
-                return false;
-            }
+        int key = event.key();
+        if (key == CFG.keyHelpOverlay) {
+            showHelpOverlay = !showHelpOverlay;
+            return true;
         }
+        if (key == CFG.keyConfigScreen) {
+            minecraft.setScreen(new HelpHelperConfigScreen(this));
+            return true;
+        }
+        if (key == CFG.keyDown) {
+            moveSelection(1);
+            return true;
+        }
+        if (key == CFG.keyUp) {
+            moveSelection(-1);
+            return true;
+        }
+        if (key == CFG.keyPageUp) {
+            pageScroll(-1.0);
+            return true;
+        }
+        if (key == CFG.keyPageDown) {
+            pageScroll(1.0);
+            return true;
+        }
+        if (key == CFG.keyHome) {
+            scrollTo(0.0);
+            selectedIndex = visible.isEmpty() ? -1 : 0;
+            return true;
+        }
+        if (key == CFG.keyEnd) {
+            scrollTo(maxScroll());
+            selectedIndex = visible.isEmpty() ? -1 : visible.size() - 1;
+            return true;
+        }
+        if (key == CFG.keyEnter || key == CFG.keyKpEnter) {
+            runCommandRow(selectedIndex >= 0 ? selectedIndex : 0);
+            return true;
+        }
+        if (key == CFG.keyCycleAction) {
+            clickAction = clickAction.next();
+            rebuildWidgetsKeepingSearch();
+            saveState();
+            return true;
+        }
+        if (key == CFG.keyToggleCompact) {
+            compactRows = !compactRows;
+            rebuildWidgetsKeepingSearch();
+            saveState();
+            return true;
+        }
+        if (key == CFG.keyToggleFavorite) {
+            toggleFavorite();
+            return true;
+        }
+        return false;
     }
 
     private void toggleFavorite() {
@@ -916,8 +942,14 @@ public final class HelpHelperScreen extends Screen {
             return;
         }
         String command = visible.get(selectedIndex).command();
-        if (!favoriteCommands.add(command)) {
+        if (favoriteCommands.contains(command)) {
             favoriteCommands.remove(command);
+            showFeedback("Removed favorite");
+        } else if (favoriteCommands.size() < Math.max(1, CFG.maxFavorites)) {
+            favoriteCommands.add(command);
+            showFeedback("Added favorite");
+        } else {
+            showFeedback("Favorite limit reached");
         }
         saveState();
     }
@@ -950,6 +982,37 @@ public final class HelpHelperScreen extends Screen {
         return counts;
     }
 
+    private String searchableText(CommandCatalog.CommandRow row) {
+        return (row.command() + " " + row.root() + " " + row.syntax() + " " + row.originHint() + " "
+            + row.info().title() + " " + row.info().category() + " " + row.info().description() + " "
+            + String.join(" ", row.info().aliases())).toLowerCase(Locale.ROOT);
+    }
+
+    private int fuzzyScore(String haystack, String needle) {
+        if (needle.isBlank()) {
+            return 100;
+        }
+        int h = 0;
+        int n = 0;
+        int streak = 0;
+        int score = 0;
+        while (h < haystack.length() && n < needle.length()) {
+            if (haystack.charAt(h) == needle.charAt(n)) {
+                streak++;
+                score += 12 + Math.min(18, streak * 3);
+                n++;
+            } else {
+                streak = 0;
+                score -= 1;
+            }
+            h++;
+        }
+        if (n < needle.length()) {
+            return 0;
+        }
+        int densityPenalty = Math.max(0, haystack.length() - needle.length()) / 8;
+        return Math.max(1, Math.min(100, score - densityPenalty));
+    }
     private int score(CommandCatalog.CommandRow row, String query) {
         if (query.isEmpty()) {
             int base = 0;
@@ -962,11 +1025,13 @@ public final class HelpHelperScreen extends Screen {
         }
 
         int score = 0;
-        String cmd = row.command().toLowerCase(java.util.Locale.ROOT);
-        String root = row.root().toLowerCase(java.util.Locale.ROOT);
-        String title = row.info().title().toLowerCase(java.util.Locale.ROOT);
-        String category = row.info().category().toLowerCase(java.util.Locale.ROOT);
-        String desc = row.info().description().toLowerCase(java.util.Locale.ROOT);
+        String cmd = row.command().toLowerCase(Locale.ROOT);
+        String root = row.root().toLowerCase(Locale.ROOT);
+        String title = row.info().title().toLowerCase(Locale.ROOT);
+        String category = row.info().category().toLowerCase(Locale.ROOT);
+        String desc = row.info().description().toLowerCase(Locale.ROOT);
+        String syntax = row.syntax().toLowerCase(Locale.ROOT);
+        String origin = row.originHint().toLowerCase(Locale.ROOT);
 
         if (cmd.startsWith("/" + query)) score += 500;
         if (root.equals(query)) score += 450;
@@ -975,7 +1040,10 @@ public final class HelpHelperScreen extends Screen {
         if (cmd.contains(query)) score += 150;
         if (title.contains(query)) score += 120;
         if (desc.contains(query)) score += 40;
-        if (row.info().aliases().stream().anyMatch(a -> a.toLowerCase(java.util.Locale.ROOT).contains(query))) score += 100;
+        if (syntax.contains(query)) score += 90;
+        if (origin.contains(query)) score += 55;
+        if (CFG.enableFuzzySearch) score += fuzzyScore(searchableText(row), query) / 2;
+        if (row.info().aliases().stream().anyMatch(a -> a.toLowerCase(Locale.ROOT).contains(query))) score += 100;
         if (favoriteCommands.contains(row.command())) score += 60;
         int recentIndex = recentCommands.indexOf(row.command());
         if (recentIndex >= 0) score += 50 - recentIndex;
@@ -1064,6 +1132,55 @@ public final class HelpHelperScreen extends Screen {
     }
 
 
+    private final class RiskyCommandConfirmScreen extends Screen {
+        private final HelpHelperScreen parent;
+        private final String command;
+
+        private RiskyCommandConfirmScreen(HelpHelperScreen parent, String command) {
+            super(Component.literal("Confirm risky command"));
+            this.parent = parent;
+            this.command = command;
+        }
+
+        @Override
+        protected void init() {
+            clearWidgets();
+            int buttonW = 82;
+            int y = height / 2 + 36;
+            int x = width / 2 - buttonW - 88;
+            addRenderableWidget(Button.builder(Component.literal("Run"), btn -> parent.runCommand(command, ClickAction.RUN))
+                .bounds(x, y, buttonW, 22).build());
+            addRenderableWidget(Button.builder(Component.literal("Edit"), btn -> parent.runCommand(command, ClickAction.FILL_CHAT))
+                .bounds(width / 2 - buttonW / 2, y, buttonW, 22).build());
+            addRenderableWidget(Button.builder(Component.literal("Cancel"), btn -> minecraft.setScreen(parent))
+                .bounds(width / 2 + 88, y, buttonW, 22).build());
+        }
+
+        @Override
+        public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
+            parent.extractBackground(gfx, mouseX, mouseY, partialTick);
+            int panelW = Math.min(360, width - 36);
+            int panelH = 124;
+            int x0 = (width - panelW) / 2;
+            int y0 = (height - panelH) / 2;
+            int x1 = x0 + panelW;
+            int y1 = y0 + panelH;
+            gfx.fill(x0, y0, x1, y1, ARGB.color(242, 16, 12, 14));
+            outlineRect(gfx, x0, y0, x1, y1, ARGB.color(230, 255, 170, 118));
+            gfx.centeredText(minecraft.font, Component.literal("Risky command").withStyle(ChatFormatting.GOLD),
+                width / 2, y0 + 12, ARGB.color(255, 255, 204, 164));
+            gfx.centeredText(minecraft.font, Component.literal(ellipsize(command, panelW - 28)),
+                width / 2, y0 + 34, ARGB.color(255, 232, 220, 208));
+            gfx.centeredText(minecraft.font, Component.literal("Run now, edit in chat, or cancel."),
+                width / 2, y0 + 55, ARGB.color(255, 184, 190, 204));
+            super.extractRenderState(gfx, mouseX, mouseY, partialTick);
+        }
+
+        @Override
+        public boolean isPauseScreen() {
+            return false;
+        }
+    }
     private record PresetHit(String command, int x0, int y0, int x1, int y1) {
         boolean contains(double x, double y) {
             return x >= x0 && x < x1 && y >= y0 && y < y1;

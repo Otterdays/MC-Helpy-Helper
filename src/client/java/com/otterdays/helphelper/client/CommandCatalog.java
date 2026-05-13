@@ -18,9 +18,26 @@ final class CommandCatalog {
     }
 
     static CommandRow row(String command, String root) {
+        return row(command, root, command, "Brigadier root /" + (root == null ? topLevelCommand(command) : root));
+    }
+
+    static CommandRow row(String command, String root, String syntax, String originHint) {
         String normalizedRoot = root == null || root.isBlank() ? topLevelCommand(command) : root;
         CommandInfo info = VANILLA_COMMANDS.getOrDefault(normalizedRoot, CommandInfo.server(normalizedRoot));
-        return new CommandRow(command, normalizedRoot, info);
+        String normalizedSyntax = syntax == null || syntax.isBlank() ? command : syntax;
+        String normalizedOrigin = originHint == null || originHint.isBlank() ? originHint(normalizedRoot, info) : originHint;
+        return new CommandRow(command, normalizedRoot, normalizedSyntax, normalizedOrigin, info);
+    }
+
+    private static String originHint(String root, CommandInfo info) {
+        if (info.vanilla()) {
+            return "Minecraft vanilla root /" + root;
+        }
+        int namespace = root.indexOf(':');
+        if (namespace > 0) {
+            return "Namespace " + root.substring(0, namespace);
+        }
+        return "Server/mod root /" + root;
     }
 
     private static String topLevelCommand(String command) {
@@ -188,7 +205,7 @@ final class CommandCatalog {
         return Arrays.asList(presets);
     }
 
-    record CommandRow(String command, String root, CommandInfo info) {
+    record CommandRow(String command, String root, String syntax, String originHint, CommandInfo info) {
         String category() {
             return info.category();
         }
@@ -199,6 +216,8 @@ final class CommandCatalog {
                 || info.title().toLowerCase(Locale.ROOT).contains(query)
                 || info.category().toLowerCase(Locale.ROOT).contains(query)
                 || info.description().toLowerCase(Locale.ROOT).contains(query)
+                || syntax.toLowerCase(Locale.ROOT).contains(query)
+                || originHint.toLowerCase(Locale.ROOT).contains(query)
                 || info.aliases().stream().anyMatch(alias -> alias.toLowerCase(Locale.ROOT).contains(query));
         }
     }

@@ -67,3 +67,21 @@
 
 - This roadmap is derived from current behavior in `HelpHelperScreen` and `CommandCatalog`.
 - Prioritize reversible, low-risk UX improvements first.
+
+## 2026-05-13 - Implementation Notes
+
+- Completed: single-click now selects rows; double-click and Enter activate the selected command.
+- Completed: hover state no longer changes keyboard selection.
+- Completed: copy/favorite actions show lightweight feedback.
+- Completed: recent/favorite caps and keyboard shortcuts now use `HelpHelperConfig` values.
+- Completed: command payload roots now preserve the top-level Brigadier command for better vanilla metadata matching.
+
+## 2026-05-13 - Power UX Pass
+
+- Added payload syntax previews and origin hints for richer command details.
+- Added fuzzy search across command, syntax, aliases, description, and origin text.
+- Added risky-command confirmation with Run, Edit, and Cancel choices.
+- Added `/` shortcut overlay and `O` in-game config screen.
+- Added config toggles for risky confirmation, fuzzy search, syntax previews, recent cap, and favorite cap.
+- Added deterministic layout regression tests for common viewport/font-size combinations.
+- Mod Menu adapter was attempted, but no currently published compatible API artifact compiled against the Minecraft 26.1.2 mappings; the config screen is ready for the adapter when one lands.
