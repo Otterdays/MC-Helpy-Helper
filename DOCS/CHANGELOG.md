@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Made the primary search/action bar wrap on cramped widths, scaled row badges/template buttons from font height, and updated config/help/confirm panels to behave better at small screen sizes and larger GUI scales.
 - Made the top toolbar height adapt to wrapped quick-filter, sort, and category rows so small GUI scales keep the list pane below the controls instead of overlapping or clipping them.
 - Shifted the Help Helper content pane off the decorative left gutter so header counters, scope text, and top controls align with the visible panel on narrow/wide layouts.
 - Updated `HelpHelperScreen` top control layout to use font-aware control height and adaptive top spacing, fixing clipped/cut-off controls on larger UI scales.

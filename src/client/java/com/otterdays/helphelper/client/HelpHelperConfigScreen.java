@@ -20,43 +20,82 @@ public final class HelpHelperConfigScreen extends Screen {
     @Override
     protected void init() {
         clearWidgets();
-        int center = width / 2;
-        int y = Math.max(44, height / 2 - 78);
-        addToggle(center, y, "Confirm risky", config.confirmRiskyCommands, value -> config.confirmRiskyCommands = value);
-        y += 26;
-        addToggle(center, y, "Fuzzy search", config.enableFuzzySearch, value -> config.enableFuzzySearch = value);
-        y += 26;
-        addToggle(center, y, "Syntax preview", config.showSyntaxPreview, value -> config.showSyntaxPreview = value);
-        y += 26;
-        addStepper(center, y, "Recents", config.maxRecentCommands, 1, 40, value -> config.maxRecentCommands = value);
-        y += 26;
-        addStepper(center, y, "Favorites", config.maxFavorites, 1, 500, value -> config.maxFavorites = value);
-        y += 34;
+        int x0 = panelLeft();
+        int y0 = panelTop();
+        int contentX = x0 + 12;
+        int contentW = panelWidth() - 24;
+        int buttonH = controlHeight();
+        int rowGap = 4;
+        int y = y0 + 30;
+
+        addToggle(contentX, y, contentW, buttonH, "Confirm risky", config.confirmRiskyCommands,
+            value -> config.confirmRiskyCommands = value);
+        y += buttonH + rowGap;
+        addToggle(contentX, y, contentW, buttonH, "Fuzzy search", config.enableFuzzySearch,
+            value -> config.enableFuzzySearch = value);
+        y += buttonH + rowGap;
+        addToggle(contentX, y, contentW, buttonH, "Syntax preview", config.showSyntaxPreview,
+            value -> config.showSyntaxPreview = value);
+        y += buttonH + rowGap;
+        addStepper(contentX, y, contentW, buttonH, "Recents", config.maxRecentCommands, 1, 40,
+            value -> config.maxRecentCommands = value);
+        y += buttonH + rowGap;
+        addStepper(contentX, y, contentW, buttonH, "Favorites", config.maxFavorites, 1, 500,
+            value -> config.maxFavorites = value);
+        y += buttonH + 10;
+
+        int doneW = Math.min(120, contentW);
         addRenderableWidget(Button.builder(Component.literal("Done"), btn -> closeAndSave())
-            .bounds(center - 50, y, 100, 22).build());
+            .bounds(x0 + (panelWidth() - doneW) / 2, y, doneW, buttonH).build());
     }
 
-    private void addToggle(int center, int y, String label, boolean value, BooleanSetter setter) {
+    private int panelWidth() {
+        return Math.min(300, width - 28);
+    }
+
+    private int controlHeight() {
+        return Math.max(22, minecraft.font.lineHeight + 10);
+    }
+
+    private int panelHeight() {
+        int buttonH = controlHeight();
+        int contentH = (buttonH * 6) + (4 * 4) + 44;
+        return Math.min(height - 28, Math.max(210, contentH));
+    }
+
+    private int panelLeft() {
+        return (width - panelWidth()) / 2;
+    }
+
+    private int panelTop() {
+        return Math.max(14, height / 2 - panelHeight() / 2);
+    }
+
+    private void addToggle(int x, int y, int width, int height, String label, boolean value, BooleanSetter setter) {
         addRenderableWidget(Button.builder(Component.literal(label + ": " + (value ? "On" : "Off")), btn -> {
             setter.set(!value);
             config.save();
             rebuildWidgets();
-        }).bounds(center - 90, y, 180, 22).build());
+        }).bounds(x, y, width, height).build());
     }
 
-    private void addStepper(int center, int y, String label, int value, int min, int max, IntSetter setter) {
+    private void addStepper(int x, int y, int width, int height, String label, int value, int min, int max,
+        IntSetter setter) {
+        int gap = 4;
+        int stepW = Math.min(Math.max(26, height), Math.max(26, (width - 80) / 4));
+        int labelW = Math.max(60, width - (stepW * 2) - (gap * 2));
         addRenderableWidget(Button.builder(Component.literal("-"), btn -> {
             setter.set(Math.max(min, value - 1));
             config.save();
             rebuildWidgets();
-        }).bounds(center - 90, y, 26, 22).build());
+        }).bounds(x, y, stepW, height).build());
         addRenderableWidget(Button.builder(Component.literal(label + ": " + value), btn -> { })
-            .bounds(center - 58, y, 116, 22).build());
+            .bounds(x + stepW + gap, y, labelW, height).build());
         addRenderableWidget(Button.builder(Component.literal("+"), btn -> {
             setter.set(Math.min(max, value + 1));
             config.save();
             rebuildWidgets();
-        }).bounds(center + 64, y, 26, 22).build());
+        }).bounds(x + stepW + gap + labelW + gap, y, stepW, height).build());
     }
 
     private void closeAndSave() {
@@ -66,10 +105,10 @@ public final class HelpHelperConfigScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
-        int panelW = Math.min(260, width - 28);
-        int panelH = Math.min(230, height - 28);
-        int x0 = (width - panelW) / 2;
-        int y0 = Math.max(14, height / 2 - panelH / 2);
+        int panelW = panelWidth();
+        int panelH = panelHeight();
+        int x0 = panelLeft();
+        int y0 = panelTop();
         int x1 = x0 + panelW;
         int y1 = y0 + panelH;
         gfx.fill(x0, y0, x1, y1, ARGB.color(226, 12, 15, 22));

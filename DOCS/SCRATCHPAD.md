@@ -2,6 +2,29 @@
 
 # SCRATCHPAD
 
+## 2026-05-13 [AMENDED-3]
+
+### Active Tasks
+
+- Harden `HelpHelperScreen` and `HelpHelperConfigScreen` for narrow widths and larger GUI/font scales.
+
+### Blockers
+
+- No blocker; needs in-game validation on the smallest GUI scale and on the config/help/confirm overlays.
+
+### Last 5 Actions
+
+1. Reworked the primary search/action/density/done strip to wrap into extra rows when width is too small for the single-row layout.
+2. Made command row badges use font-aware vertical insets instead of fixed badge box padding.
+3. Made detail-panel template rows use dynamic heights derived from `minecraft.font.lineHeight`.
+4. Scaled the config screen panel/buttons from panel width and font height rather than fixed 180/22-style sizing.
+5. Made help/confirm overlay panel heights adapt to larger font sizes and recompiled successfully with `./gradlew.bat compileClientJava`.
+
+### Next Steps
+
+- User re-test the smallest GUI scale and config/help/confirm screens.
+- If tiny widths still feel overloaded, add a true small-screen fallback that hides category chips behind a secondary toggle.
+
 ## 2026-05-13 [AMENDED-2]
 
 ### Active Tasks

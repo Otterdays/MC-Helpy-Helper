@@ -99,47 +99,8 @@ public final class HelpHelperScreen extends Screen {
         int controlH = Math.max(CFG.controlHeight, minecraft.font.lineHeight + 10);
         int headerBlockHeight = (minecraft.font.lineHeight * 2) + 34;
         int topControls = margin() + headerBlockHeight;
-        int gap = CFG.buttonGap;
-        int closeW = CFG.closeButtonWidth;
-        int densityW = CFG.densityButtonWidth;
-        int actionW = Math.min(CFG.actionButtonWidth, Math.max(72, (listRight - listLeft) / 5));
-        int controlAreaW = Math.max(120, listRight - listLeft);
-        int minSearchW = Math.min(CFG.searchMinWidth, Math.max(64, controlAreaW / 3));
-        int targetRightW = Math.max(120, controlAreaW - minSearchW - gap);
-        int rightTotalW = actionW + densityW + closeW + (gap * 2);
-        if (rightTotalW > targetRightW) {
-            double scale = targetRightW / (double) rightTotalW;
-            actionW = Math.max(56, (int) Math.floor(actionW * scale));
-            densityW = Math.max(56, (int) Math.floor(densityW * scale));
-            closeW = Math.max(50, (int) Math.floor(closeW * scale));
-        }
-        int closeLeft = listRight - closeW;
-        int densityLeft = closeLeft - gap - densityW;
-        int actionLeft = densityLeft - gap - actionW;
-        int searchW = Math.max(64, actionLeft - listLeft - gap);
-
-        searchBox = new EditBox(minecraft.font, listLeft, topControls, searchW, controlH, Component.literal("Search"));
-        searchBox.setResponder(this::applyFilter);
-        searchBox.setHint(Component.literal(ChatFormatting.GRAY + "Search commands..."));
-        addRenderableWidget(searchBox);
-
-        addRenderableWidget(Button.builder(Component.literal(clickAction.label()), btn -> {
-            clickAction = clickAction.next();
-            rebuildWidgetsKeepingSearch();
-            saveState();
-        }).bounds(actionLeft, topControls, actionW, controlH).build());
-
-        addRenderableWidget(Button.builder(Component.literal(compactRows ? "Compact" : "Roomy"), btn -> {
-            compactRows = !compactRows;
-            rebuildWidgetsKeepingSearch();
-            saveState();
-        }).bounds(densityLeft, topControls, densityW, controlH).build());
-
-        addRenderableWidget(Button.builder(Component.translatable("gui.done"), btn -> minecraft.setScreen(null))
-            .bounds(closeLeft, topControls, closeW, controlH)
-            .build());
-
-        int quickY = topControls + controlH + 6;
+        int primaryBottom = addPrimaryControls(topControls, controlH);
+        int quickY = primaryBottom + 6;
         int quickBottom = addQuickFilterButtons(quickY, controlH);
         int modeBottom = addModeButtons(quickBottom + 3, controlH);
         int categoryBottom = addCategoryButtons(modeBottom + 3, controlH);
@@ -163,6 +124,92 @@ public final class HelpHelperScreen extends Screen {
         listRight = layout.listRight();
         listBottom = layout.listBottom();
         clampScrollForViewport();
+    }
+
+    private int addPrimaryControls(int y, int controlH) {
+        int gap = CFG.buttonGap;
+        int controlAreaW = Math.max(80, listRight - listLeft);
+        int minSearchW = Math.min(CFG.searchMinWidth, Math.max(80, controlAreaW / 3));
+        int actionW = Math.min(CFG.actionButtonWidth, Math.max(72, controlAreaW / 5));
+        int densityW = CFG.densityButtonWidth;
+        int closeW = CFG.closeButtonWidth;
+        int inlineMinimum = minSearchW + gap + 56 + gap + 56 + gap + 50;
+        if (controlAreaW >= inlineMinimum) {
+            int targetRightW = Math.max(120, controlAreaW - minSearchW - gap);
+            int rightTotalW = actionW + densityW + closeW + (gap * 2);
+            if (rightTotalW > targetRightW) {
+                double scale = targetRightW / (double) rightTotalW;
+                actionW = Math.max(56, (int) Math.floor(actionW * scale));
+                densityW = Math.max(56, (int) Math.floor(densityW * scale));
+                closeW = Math.max(50, (int) Math.floor(closeW * scale));
+            }
+            int closeLeft = listRight - closeW;
+            int densityLeft = closeLeft - gap - densityW;
+            int actionLeft = densityLeft - gap - actionW;
+            int searchW = Math.max(minSearchW, actionLeft - listLeft - gap);
+            addSearchBox(listLeft, y, searchW, controlH);
+            addActionModeButton(actionLeft, y, actionW, controlH);
+            addDensityButton(densityLeft, y, densityW, controlH);
+            addDoneButton(closeLeft, y, closeW, controlH);
+            return y + controlH;
+        }
+
+        addSearchBox(listLeft, y, controlAreaW, controlH);
+        int buttonY = y + controlH + 4;
+        int minButtonTotal = 56 + 56 + 50 + (gap * 2);
+        if (controlAreaW >= minButtonTotal) {
+            int total = actionW + densityW + closeW + (gap * 2);
+            if (total > controlAreaW) {
+                double scale = (controlAreaW - (gap * 2)) / (double) (actionW + densityW + closeW);
+                actionW = Math.max(56, (int) Math.floor(actionW * scale));
+                densityW = Math.max(56, (int) Math.floor(densityW * scale));
+                closeW = Math.max(50, controlAreaW - actionW - densityW - (gap * 2));
+            }
+            int actionLeft = listRight - (actionW + densityW + closeW + (gap * 2));
+            int densityLeft = actionLeft + actionW + gap;
+            int closeLeft = densityLeft + densityW + gap;
+            addActionModeButton(actionLeft, buttonY, actionW, controlH);
+            addDensityButton(densityLeft, buttonY, densityW, controlH);
+            addDoneButton(closeLeft, buttonY, closeW, controlH);
+            return buttonY + controlH;
+        }
+
+        int pairGap = gap;
+        int pairW = Math.max(58, (controlAreaW - pairGap) / 2);
+        addActionModeButton(listLeft, buttonY, pairW, controlH);
+        addDensityButton(listLeft + pairW + pairGap, buttonY, Math.max(58, controlAreaW - pairW - pairGap), controlH);
+        int closeY = buttonY + controlH + 4;
+        addDoneButton(listLeft, closeY, controlAreaW, controlH);
+        return closeY + controlH;
+    }
+
+    private void addSearchBox(int x, int y, int width, int height) {
+        searchBox = new EditBox(minecraft.font, x, y, width, height, Component.literal("Search"));
+        searchBox.setResponder(this::applyFilter);
+        searchBox.setHint(Component.literal(ChatFormatting.GRAY + "Search commands..."));
+        addRenderableWidget(searchBox);
+    }
+
+    private void addActionModeButton(int x, int y, int width, int height) {
+        addRenderableWidget(Button.builder(Component.literal(clickAction.label()), btn -> {
+            clickAction = clickAction.next();
+            rebuildWidgetsKeepingSearch();
+            saveState();
+        }).bounds(x, y, width, height).build());
+    }
+
+    private void addDensityButton(int x, int y, int width, int height) {
+        addRenderableWidget(Button.builder(Component.literal(compactRows ? "Compact" : "Roomy"), btn -> {
+            compactRows = !compactRows;
+            rebuildWidgetsKeepingSearch();
+            saveState();
+        }).bounds(x, y, width, height).build());
+    }
+
+    private void addDoneButton(int x, int y, int width, int height) {
+        addRenderableWidget(Button.builder(Component.translatable("gui.done"), btn -> minecraft.setScreen(null))
+            .bounds(x, y, width, height)
+            .build());
     }
 
     private void applyFilter(String raw) {
@@ -474,7 +521,8 @@ public final class HelpHelperScreen extends Screen {
                 if (favoriteCommands.contains(row.command())) {
                     gfx.text(minecraft.font, "*", listLeft + 7, ty, ARGB.color(255, 255, 226, 120));
                 }
-                drawRowBadge(gfx, row, badgeRight - CFG.badgeWidth, yi + 3, badgeRight, yi + lineHeight - 6);
+                int badgeInset = Math.max(2, (lineHeight - (minecraft.font.lineHeight + 6)) / 2);
+                drawRowBadge(gfx, row, badgeRight - CFG.badgeWidth, yi + badgeInset, badgeRight, yi + lineHeight - badgeInset);
             }
         } finally {
             gfx.disableScissor();
@@ -572,26 +620,31 @@ public final class HelpHelperScreen extends Screen {
             gfx.text(minecraft.font, "  Templates", x, y, ARGB.color(255, 255, 226, 120));
             y += minecraft.font.lineHeight + 5;
             List<PresetHit> hits = new ArrayList<>();
+            int presetH = minecraft.font.lineHeight + 8;
+            int presetGap = 3;
             for (String preset : info.presets()) {
-                if (y + 18 > panelBottom - 6) {
+                if (y + presetH > panelBottom - 6) {
                     break;
                 }
-                int px0 = x, py0 = y, px1 = panelRight - 8, py1 = y + 17;
+                int px0 = x, py0 = y, px1 = panelRight - 8, py1 = y + presetH;
                 boolean hovered = mouseX >= px0 && mouseX < px1 && mouseY >= py0 && mouseY < py1;
                 gfx.fill(px0, py0, px1, py1, hovered ? ARGB.color(148, 82, 92, 124) : ARGB.color(82, 38, 42, 60));
                 outlineRect(gfx, px0, py0, px1, py1,
                     hovered ? ARGB.color(185, 90, 102, 158) : ARGB.color(95, 62, 74, 116));
-                gfx.text(minecraft.font, ellipsize(preset, maxW - 12), px0 + 5, py0 + 4, ARGB.color(255, 210, 245, 255));
+                int presetTextY = py0 + Math.max(2, (presetH - minecraft.font.lineHeight) / 2);
+                gfx.text(minecraft.font, ellipsize(preset, maxW - 12), px0 + 5, presetTextY, ARGB.color(255, 210, 245, 255));
                 hits.add(new PresetHit(preset, px0, py0, px1, py1));
-                y += 20;
+                y += presetH + presetGap;
             }
             presetHits = hits;
         }
     }
 
     private void drawShortcutOverlay(GuiGraphicsExtractor gfx) {
+        int lineGap = 7;
+        int contentLines = 5;
         int panelW = Math.min(330, width - margin() * 4);
-        int panelH = 150;
+        int panelH = Math.min(height - margin() * 2, 36 + contentLines * (minecraft.font.lineHeight + lineGap));
         int x0 = (width - panelW) / 2;
         int y0 = Math.max(margin() + 20, (height - panelH) / 2);
         int x1 = x0 + panelW;
@@ -610,7 +663,7 @@ public final class HelpHelperScreen extends Screen {
         );
         for (String line : lines) {
             gfx.text(minecraft.font, line, x0 + 14, y, ARGB.color(255, 212, 220, 238));
-            y += minecraft.font.lineHeight + 7;
+            y += minecraft.font.lineHeight + lineGap;
         }
     }
     private void drawScrollbar(GuiGraphicsExtractor gfx) {
@@ -1189,7 +1242,7 @@ public final class HelpHelperScreen extends Screen {
         public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
             parent.extractBackground(gfx, mouseX, mouseY, partialTick);
             int panelW = Math.min(360, width - 36);
-            int panelH = 124;
+            int panelH = Math.min(height - 36, Math.max(124, minecraft.font.lineHeight * 4 + 66));
             int x0 = (width - panelW) / 2;
             int y0 = (height - panelH) / 2;
             int x1 = x0 + panelW;
