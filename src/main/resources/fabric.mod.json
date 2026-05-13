@@ -3,6 +3,7 @@
   "id": "helphelper",
   "version": "${version}",
   "name": "Help Helper",
+  "icon": "icon.png",
   "description": "Opens a full-window, searchable Minecraft-styled GUI when using /help, listing commands you can click to run.",
   "authors": [
     "Otterdays"

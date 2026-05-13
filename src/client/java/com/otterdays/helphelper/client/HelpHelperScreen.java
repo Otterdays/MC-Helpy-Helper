@@ -140,10 +140,10 @@ public final class HelpHelperScreen extends Screen {
             .build());
 
         int quickY = topControls + controlH + 6;
-        addQuickFilterButtons(quickY, controlH);
-        int modeY = quickY + controlH + 3;
-        addModeButtons(modeY, controlH);
-        addCategoryButtons(modeY + controlH + 3, controlH);
+        int quickBottom = addQuickFilterButtons(quickY, controlH);
+        int modeBottom = addModeButtons(quickBottom + 3, controlH);
+        int categoryBottom = addCategoryButtons(modeBottom + 3, controlH);
+        adjustListTopForControls(categoryBottom);
         applyFilter(searchBox.getValue());
     }
 
@@ -180,9 +180,31 @@ public final class HelpHelperScreen extends Screen {
         clampScrollForViewport();
     }
 
-    private void addCategoryButtons(int y, int buttonH) {
+    private int minListHeight() {
+        return 72;
+    }
+
+    private int topHintReserve() {
+        return minecraft.font.lineHeight + 10;
+    }
+
+    private int maxControlBottom() {
+        int reserve = minListHeight() + topHintReserve();
+        return Math.max(margin() + 56, height - margin() - reserve);
+    }
+
+    private void adjustListTopForControls(int controlsBottom) {
+        int desiredTop = controlsBottom + topHintReserve();
+        int maxTop = Math.max(margin() + 60, height - margin() - minListHeight());
+        listTop = Math.min(Math.max(listTop, desiredTop), maxTop);
+        listBottom = Math.max(listTop + minListHeight(), height - margin());
+        clampScrollForViewport();
+    }
+
+    private int addCategoryButtons(int y, int buttonH) {
         int x = listLeft;
         int gap = 5;
+        int bottomLimit = maxControlBottom();
         x = addCategoryButton("All", "", allCommands.size(), x, y, buttonH) + gap;
         int rowY = y;
         for (String category : categories) {
@@ -190,24 +212,27 @@ public final class HelpHelperScreen extends Screen {
                 rowY += buttonH + 4;
                 x = listLeft;
             }
-            if (rowY + buttonH >= listTop - 6) {
-                return;
+            if (rowY + buttonH > bottomLimit) {
+                return Math.max(y + buttonH, rowY - 4);
             }
             int needed = Math.max(CFG.minCategoryWidth, minecraft.font.width(category) + 24);
             if (x > listLeft && x + needed > listRight) {
                 rowY += buttonH + 4;
                 x = listLeft;
             }
-            if (rowY + buttonH >= listTop - 6) {
-                return;
+            if (rowY + buttonH > bottomLimit) {
+                return Math.max(y + buttonH, rowY - 4);
             }
             x = addCategoryButton(category, category, categoryCounts.getOrDefault(category, 0), x, rowY, buttonH) + gap;
         }
+        return rowY + buttonH;
     }
 
-    private void addQuickFilterButtons(int y, int buttonH) {
+    private int addQuickFilterButtons(int y, int buttonH) {
         int x = listLeft;
         int gap = 5;
+        int rowY = y;
+        int bottomLimit = maxControlBottom();
         for (QuickFilter filter : QuickFilter.values()) {
             String label = filter.label();
             int count = filter.count(allCommands, favoriteCommands, recentCommands);
@@ -215,11 +240,11 @@ public final class HelpHelperScreen extends Screen {
             int w = Math.min(Math.max(CFG.minCategoryWidth, minecraft.font.width(text) + 18),
                 Math.max(CFG.minCategoryWidth, listRight - x));
             if (x > listLeft && x + w > listRight) {
-                y += buttonH + 4;
+                rowY += buttonH + 4;
                 x = listLeft;
             }
-            if (y + buttonH >= listTop - 6) {
-                return;
+            if (rowY + buttonH > bottomLimit) {
+                return Math.max(y + buttonH, rowY - 4);
             }
             w = Math.min(Math.max(CFG.minCategoryWidth, minecraft.font.width(text) + 18),
                 Math.max(CFG.minCategoryWidth, listRight - x));
@@ -227,24 +252,27 @@ public final class HelpHelperScreen extends Screen {
                 quickFilter = filter;
                 rebuildWidgetsKeepingSearch();
                 saveState();
-            }).bounds(x, y, w, buttonH).build());
+            }).bounds(x, rowY, w, buttonH).build());
             x += w + gap;
         }
+        return rowY + buttonH;
     }
 
-    private void addModeButtons(int y, int buttonH) {
+    private int addModeButtons(int y, int buttonH) {
         int x = listLeft;
         int gap = 5;
+        int rowY = y;
+        int bottomLimit = maxControlBottom();
         for (SortMode mode : SortMode.values()) {
             String text = sortMode == mode ? "[" + mode.label() + "]" : mode.label();
             int w = Math.min(Math.max(CFG.minCategoryWidth, minecraft.font.width(text) + 18),
                 Math.max(CFG.minCategoryWidth, listRight - x));
             if (x > listLeft && x + w > listRight) {
-                y += buttonH + 4;
+                rowY += buttonH + 4;
                 x = listLeft;
             }
-            if (y + buttonH >= listTop - 6) {
-                return;
+            if (rowY + buttonH > bottomLimit) {
+                return Math.max(y + buttonH, rowY - 4);
             }
             w = Math.min(Math.max(CFG.minCategoryWidth, minecraft.font.width(text) + 18),
                 Math.max(CFG.minCategoryWidth, listRight - x));
@@ -252,18 +280,18 @@ public final class HelpHelperScreen extends Screen {
                 sortMode = mode;
                 rebuildWidgetsKeepingSearch();
                 saveState();
-            }).bounds(x, y, w, buttonH).build());
+            }).bounds(x, rowY, w, buttonH).build());
             x += w + gap;
         }
         int clearW = Math.min(72, Math.max(CFG.minCategoryWidth, listRight - x));
         if (clearW >= CFG.minCategoryWidth) {
             if (x > listLeft && x + clearW > listRight) {
-                y += buttonH + 4;
+                rowY += buttonH + 4;
                 x = listLeft;
                 clearW = Math.min(72, Math.max(CFG.minCategoryWidth, listRight - x));
             }
-            if (y + buttonH >= listTop - 6) {
-                return;
+            if (rowY + buttonH > bottomLimit) {
+                return Math.max(y + buttonH, rowY - 4);
             }
             addRenderableWidget(Button.builder(Component.literal("Clear"), btn -> {
                 quickFilter = QuickFilter.ALL;
@@ -274,8 +302,9 @@ public final class HelpHelperScreen extends Screen {
                 }
                 rebuildWidgetsKeepingSearch();
                 saveState();
-            }).bounds(x, y, clearW, buttonH).build());
+            }).bounds(x, rowY, clearW, buttonH).build());
         }
+        return rowY + buttonH;
     }
 
     private int addCategoryButton(String label, String category, int count, int x, int y, int h) {

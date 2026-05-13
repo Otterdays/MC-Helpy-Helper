@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Made the top toolbar height adapt to wrapped quick-filter, sort, and category rows so small GUI scales keep the list pane below the controls instead of overlapping or clipping them.
+- Shifted the Help Helper content pane off the decorative left gutter so header counters, scope text, and top controls align with the visible panel on narrow/wide layouts.
 - Updated `HelpHelperScreen` top control layout to use font-aware control height and adaptive top spacing, fixing clipped/cut-off controls on larger UI scales.
 - Hardened `HelpHelperScreen` for edge cases by scaling top-row control widths on narrow layouts and reserving more vertical space for top controls/filters.
 - Refined `HelpHelperScreen` header styling to be more compact/professional by tightening header height, vertical gaps, and strip/text placement while keeping controls visible.
@@ -20,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added a simple `otterdays` text icon source (`icon.svg`) and launcher-friendly `icon.png` metadata path so Prism can display a project-specific mod icon.
 - **Favorites system**: Press `F` to favorite/unfavorite selected command; favorites appear first in default sort.
 - **Recent commands tracking**: Last 12 executed commands tracked and boosted in ranking.
 - **Quick filter buttons**: Filter by All, Favorites, Recent, Vanilla, Modded, Safe, or Risky commands.

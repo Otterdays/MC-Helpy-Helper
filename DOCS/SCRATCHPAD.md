@@ -2,6 +2,75 @@
 
 # SCRATCHPAD
 
+## 2026-05-13 [AMENDED-2]
+
+### Active Tasks
+
+- Harden `HelpHelperScreen` top toolbar for small GUI scales so wrapped filter/category rows do not collide with the list pane.
+
+### Blockers
+
+- No blocker; needs in-game verification on the smallest failing GUI scale.
+
+### Last 5 Actions
+
+1. Identified fixed `listTop` row budget as the reason wrapped top-bar controls were clipping/breaking on small GUI sizes.
+2. Changed quick-filter, sort, and category button builders to return their actual wrapped bottom row.
+3. Added dynamic list-top adjustment so the command pane starts below the real control stack instead of below a guessed height.
+4. Added a control-bottom limit to preserve a minimum list viewport on cramped screens.
+5. Recompiled successfully with `./gradlew.bat compileClientJava`.
+
+### Next Steps
+
+- User verify the smallest failing GUI scale/resolution.
+- If categories still crowd the top area, collapse category chips into fewer rows or move them behind a secondary view.
+
+## 2026-05-13 [AMENDED]
+
+### Active Tasks
+
+- Finish narrow-width UI pass for `HelpHelperScreen`, with focus on top-row alignment against the left decorative gutter.
+
+### Blockers
+
+- No blocker; latest pass needs in-game visual confirmation on the wide/short layout from user screenshot.
+
+### Last 5 Actions
+
+1. Reviewed the screenshot showing the left gutter offsetting the count/scope/action rows.
+2. Traced the misalignment to layout math anchoring usable content at the outer frame edge.
+3. Added a fixed decorative gutter offset in `HelpHelperLayoutMath` so content starts at the inner panel edge.
+4. Recompiled with `./gradlew.bat compileClientJava`.
+5. Confirmed the layout math change is lint-clean.
+
+### Next Steps
+
+- User verify the top header/count/search rows now line up cleanly.
+- If the header still feels cramped, move only the text rows farther in without shrinking the full list pane.
+
+## 2026-05-13
+
+### Active Tasks
+
+- Replace launcher-facing mod icon metadata with a simple `otterdays` text icon for Prism visibility.
+
+### Blockers
+
+- Prism Launcher icon parsing can be inconsistent for non-PNG assets, so a PNG fallback is required even if the source art is SVG.
+
+### Last 5 Actions
+
+1. Confirmed `fabric.mod.json` did not declare an icon field.
+2. Verified Prism Launcher commonly reads Fabric icon metadata from `fabric.mod.json`.
+3. Confirmed current bundled icon art was still template branding instead of project-specific art.
+4. Added a simple two-line `otterdays` SVG source asset.
+5. Updated mod metadata to point at a root-level `icon.png` for launcher compatibility.
+
+### Next Steps
+
+- Generate matching `icon.png` files in the jar root and `assets/helphelper/`.
+- Rebuild resources and confirm Prism now shows the custom icon.
+
 ## 2026-05-06 [AMENDED-3]
 
 ### Active Tasks

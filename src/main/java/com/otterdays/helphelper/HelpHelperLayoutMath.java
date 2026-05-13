@@ -1,6 +1,8 @@
 package com.otterdays.helphelper;
 
 public final class HelpHelperLayoutMath {
+    private static final int DECORATIVE_GUTTER = 14;
+
     private HelpHelperLayoutMath() {
     }
 
@@ -9,8 +11,8 @@ public final class HelpHelperLayoutMath {
         int m = Math.max(margin, Math.min(width, height) / 42);
         int controlH = Math.max(controlHeight, fontLineHeight + 10);
         int headerBlockHeight = (fontLineHeight * 2) + 34;
-        int listLeft = m;
-        int available = Math.max(40, width - (m * 2));
+        int listLeft = m + DECORATIVE_GUTTER;
+        int available = Math.max(40, width - (m * 2) - DECORATIVE_GUTTER);
         int details = available >= 460 ? Math.min(detailPanelWidth, available / 3) : 0;
         int listRight = Math.max(listLeft + 40, width - m - details - (details > 0 ? detailPanelGap : 0));
         int controlRowsReserve = 5;
